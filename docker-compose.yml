@@ -1,0 +1,11 @@
+services:
+  openvscode:
+    image: gitpod/openvscode-server:latest
+    container_name: openvscode-server
+    ports:
+      - "3000:3000"
+    environment:
+      - DISABLE_TERMINAL=true
+    volumes:
+      - .:/home/workspace:cached
+    command: ["openvscode-server", "/home/workspace/clava.code-workspace"]
