@@ -57,10 +57,10 @@ function activate(context) {
             return;
         }
         const uris = [
-            vscode.Uri.joinPath(workspaceFolder.uri, 'file1.txt'),
-            vscode.Uri.joinPath(workspaceFolder.uri, 'file2.txt'),
-            vscode.Uri.joinPath(workspaceFolder.uri, 'file3.txt'),
-            vscode.Uri.joinPath(workspaceFolder.uri, 'file4.txt')
+            vscode.Uri.joinPath(workspaceFolder.uri, 'input/input.cpp'),
+            vscode.Uri.joinPath(workspaceFolder.uri, 'script.js'),
+            vscode.Uri.joinPath(workspaceFolder.uri, 'result.cpp'),
+            vscode.Uri.joinPath(workspaceFolder.uri, 'log.txt')
         ];
         await setup2x2Grid(uris);
         vscode.window.showInformationMessage('Opened files in 2x2 grid layout!');

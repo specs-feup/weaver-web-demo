@@ -14,10 +14,6 @@
   "contributes": {
     "commands": [
       {
-        "command": "layout-builder.helloWorld",
-        "title": "Hello World"
-      },
-      {
         "command": "2x2-grid",
         "title": "Grid-2x2"
       }
