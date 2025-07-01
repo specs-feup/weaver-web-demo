@@ -3,9 +3,19 @@
     { "path": "." }
   ],
   "settings": {
-    "workbench.editor.openSideBySideDirection": "right"
+    "workbench.editor.openSideBySideDirection": "right",
+    "workbench.startupEditor": "none",
+    "workbench.welcomePage.walkthroughs.enabled": false,
+    "security.workspace.trust.enabled": false,
+    "extensions.ignoreRecommendations": true,
+    "update.showReleaseNotes": false,
+    "telemetry.telemetryLevel": "off",
+    "workbench.tips.enabled": false,
+    "workbench.enableExperiments": false,
+    "workbench.enableGettingStartedPage": false,
   },
   "extensions": {
-    "recommendations": []
+    "recommendations": [],
+    "unwantedRecommendations": ["vscode.git"]
   }
 }
