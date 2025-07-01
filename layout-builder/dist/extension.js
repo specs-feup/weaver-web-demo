@@ -49,22 +49,16 @@ const vscode = __importStar(__webpack_require__(1));
 async function activate(context) {
     console.log('Extension "layout-builder" active');
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
-    if (!workspaceFolder) {
-        vscode.window.showErrorMessage("No workspace folder open.");
-        return;
-    }
     const uris = [
         vscode.Uri.joinPath(workspaceFolder.uri, 'input/input.cpp'),
         vscode.Uri.joinPath(workspaceFolder.uri, 'script.js'),
         vscode.Uri.joinPath(workspaceFolder.uri, 'result.cpp'),
         vscode.Uri.joinPath(workspaceFolder.uri, 'log.txt')
     ];
-    // Monta o layout automaticamente na ativação
+    // Assemble the 2x2 grid
     await setup2x2Grid(uris);
-    // Também registra o comando se quiser executar manualmente
     const disposable = vscode.commands.registerCommand('2x2-grid', async () => {
         await setup2x2Grid(uris);
-        vscode.window.showInformationMessage('Opened files in 2x2 grid layout!');
     });
     context.subscriptions.push(disposable);
 }
