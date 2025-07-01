@@ -46,22 +46,23 @@ exports.deactivate = deactivate;
 const vscode = __importStar(__webpack_require__(1));
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
-function activate(context) {
-    // Use the console to output diagnostic information (console.log) and errors (console.error)
-    // This line of code will only be executed once when your extension is activated
-    console.log('Congratulations, your extension "layout-builder" is now active!');
+async function activate(context) {
+    console.log('Extension "layout-builder" active');
+    const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+    if (!workspaceFolder) {
+        vscode.window.showErrorMessage("No workspace folder open.");
+        return;
+    }
+    const uris = [
+        vscode.Uri.joinPath(workspaceFolder.uri, 'input/input.cpp'),
+        vscode.Uri.joinPath(workspaceFolder.uri, 'script.js'),
+        vscode.Uri.joinPath(workspaceFolder.uri, 'result.cpp'),
+        vscode.Uri.joinPath(workspaceFolder.uri, 'log.txt')
+    ];
+    // Monta o layout automaticamente na ativação
+    await setup2x2Grid(uris);
+    // Também registra o comando se quiser executar manualmente
     const disposable = vscode.commands.registerCommand('2x2-grid', async () => {
-        const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
-        if (!workspaceFolder) {
-            vscode.window.showErrorMessage("No workspace folder open.");
-            return;
-        }
-        const uris = [
-            vscode.Uri.joinPath(workspaceFolder.uri, 'input/input.cpp'),
-            vscode.Uri.joinPath(workspaceFolder.uri, 'script.js'),
-            vscode.Uri.joinPath(workspaceFolder.uri, 'result.cpp'),
-            vscode.Uri.joinPath(workspaceFolder.uri, 'log.txt')
-        ];
         await setup2x2Grid(uris);
         vscode.window.showInformationMessage('Opened files in 2x2 grid layout!');
     });
