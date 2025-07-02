@@ -8,4 +8,4 @@ services:
       - DISABLE_TERMINAL=true
     volumes:
       - .:/home/workspace:cached
-    command: ["openvscode-server", "--without-connection-token", "--default-workspace","/home/workspace/files", "--default-folder", "/home/workspace/files/input"]
+    command: ["openvscode-server", "--without-connection-token", "--default-workspace","/home/workspace/files", "--default-folder", "/home/workspace/files"]
