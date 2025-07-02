@@ -4,9 +4,7 @@
   ],
   "settings": {
     "workbench.editor.openSideBySideDirection": "right",
-    "workbench.startupEditor": "none",
     "workbench.welcomePage.walkthroughs.enabled": false,
-    "security.workspace.trust.enabled": false,
     "extensions.ignoreRecommendations": true,
     "update.showReleaseNotes": false,
     "telemetry.telemetryLevel": "off",
