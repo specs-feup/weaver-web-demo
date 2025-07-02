@@ -1,5 +1,9 @@
 {
     "workbench.editor.openSideBySideDirection": "right",
     "extensions.ignoreRecommendations": true,
-    "workbench.tips.enabled": false
+    "workbench.tips.enabled": false,
+    "editor.minimap.enabled": false,
+    "workbench.editor.showTabs": false,
+    "workbench.statusBar.visible": false,
+    "workbench.startupEditor": "none"
 }

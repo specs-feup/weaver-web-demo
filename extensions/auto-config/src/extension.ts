@@ -26,7 +26,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			continue;
 		}
 		
-		await vscode.workspace.getConfiguration().update(key, value, vscode.ConfigurationTarget.Global);
+		await vscode.workspace.getConfiguration().update(key, value, vscode.ConfigurationTarget.Workspace);
     }
   } catch (err) {
     vscode.window.showErrorMessage(`Failed to apply custom settings: ${err}`);

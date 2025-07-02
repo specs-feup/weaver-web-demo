@@ -13,5 +13,5 @@ COPY files /home/workspace/files
 RUN mkdir -p /tmp/exts
 
 # Copy the layout-builder extension into the temporary extensions directory
-COPY ./layout-builder/layout-builder-0.0.1.vsix /tmp/exts/layout-builder-0.0.1.vsix
-COPY ./auto-config/auto-config-0.0.1.vsix /tmp/exts/auto-config-0.0.1.vsix
+COPY ./extensions/layout-builder/layout-builder-0.0.1.vsix /tmp/exts/layout-builder-0.0.1.vsix
+COPY ./extensions/auto-config/auto-config-0.0.1.vsix /tmp/exts/auto-config-0.0.1.vsix
