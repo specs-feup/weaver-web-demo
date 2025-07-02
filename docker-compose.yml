@@ -18,6 +18,7 @@ services:
      "--default-folder", "/home/workspace/files",
      "--install-extension", "/tmp/exts/layout-builder-0.0.1.vsix",
      "--install-extension", "/tmp/exts/auto-config-0.0.1.vsix",
+     "--install-extension", "/tmp/exts/weaver-0.0.1.vsix",
      "--disable-workspace-trust",
      "--start-server"
     ]

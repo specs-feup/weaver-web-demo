@@ -15,3 +15,4 @@ RUN mkdir -p /tmp/exts
 # Copy the layout-builder extension into the temporary extensions directory
 COPY ./extensions/layout-builder/layout-builder-0.0.1.vsix /tmp/exts/layout-builder-0.0.1.vsix
 COPY ./extensions/auto-config/auto-config-0.0.1.vsix /tmp/exts/auto-config-0.0.1.vsix
+COPY ./extensions/weaver/weaver-0.0.1.vsix /tmp/exts/weaver-0.0.1.vsix
