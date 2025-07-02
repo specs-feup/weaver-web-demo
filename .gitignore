@@ -1,4 +1,5 @@
 .cache/
 .openvscode-server/
-./weaver/node_modules/
-./layout-builder/node_modules/
+node_modules/
+node_modules/
+.vscode/
