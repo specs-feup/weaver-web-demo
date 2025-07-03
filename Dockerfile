@@ -9,7 +9,6 @@ ENV TOOL_NAME=${TOOL_NAME}
 WORKDIR /home/workspace
 
 # Copy the workspace file and files directory into the container
-COPY clava.code-workspace /home/workspace/clava.code-workspace
 COPY files /home/workspace/files
 
 # Create separate directory for extensions
