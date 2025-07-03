@@ -7,7 +7,7 @@ services:
         TOOL_NAME: clava
     container_name: openvscode-server
     ports:
-      - "5000:3000"
+      - "3000:3000"
     environment:
       - DISABLE_TERMINAL=true
     volumes:
