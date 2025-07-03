@@ -62,7 +62,7 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
 		<!DOCTYPE html>
 		<html lang="en">
 			<body>
-				<div style = "justify-content-center">
+				<div style = "max-width:fit-content; margin-left:auto; margin-right:auto">
 					<div>
 						<img src= ${path} alt="Shrek 1" width="168" height="33">
 					</div>
