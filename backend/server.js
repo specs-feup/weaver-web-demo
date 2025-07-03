@@ -1,12 +1,16 @@
 // backend/server.js
-import express, { json } from 'express';
-import cors from 'cors';
-import { exec } from 'child_process';
 import 'dotenv/config';
+import cors from 'cors';
+import multer from 'multer';
+import express, { json } from 'express';
+import { exec } from 'child_process';
+import { runWeaver } from './weaver.js';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 const TOOL = process.env.TOOL;
+
+const upload = multer({ dest: 'uploads/' });
 
 app.use(cors());
 app.use(json());
@@ -30,6 +34,12 @@ app.get(`/${TOOL}`, (req, res) => {
       stderr: stderr.trim(),
     });
   });
+});
+
+app.post('/api/weave', upload.single('zipfile'), (req, res) => {
+
+  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+
 });
 
 app.listen(PORT, () => {
