@@ -7,7 +7,7 @@ services:
         TOOL_NAME: kadabra
     container_name: openvscode-server
     ports:
-      - "3000:3000"
+      - "9000:3000"
     environment:
       - DISABLE_TERMINAL=true
     volumes:
