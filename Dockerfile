@@ -1,12 +1,14 @@
 FROM gitpod/openvscode-server:latest
 
+# This will be replaced by the tool name when building the image through docker-compose
+ARG TOOL_NAME=placeholder
+
+ENV TOOL_NAME=${TOOL_NAME}
+
 # Set the working directory
 WORKDIR /home/workspace
 
-ENV tool=clava
-
 # Copy the workspace file and files directory into the container
-COPY clava.code-workspace /home/workspace/clava.code-workspace
 COPY files /home/workspace/files
 
 # Create separate directory for extensions
