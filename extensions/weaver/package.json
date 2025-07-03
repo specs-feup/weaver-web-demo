@@ -9,27 +9,37 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": ["onView:e-weaver"],
   "main": "./dist/extension.js",
   "contributes": {
-    "commands": [],
+    "commands": 
+    [
+      {
+        "command": "TreeDataProvider.refreshEntry",
+        "title": "Refresh",
+        "icon": 
+        {
+        "light": "resources/light/refresh.svg",
+        "dark": "resources/dark/refresh.svg"
+        }
+      }
+    ],
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "weaver-sidebar-view",
-          "title": "weaver",
-          "icon": "media/heart.svg"
+        "id": "weaver-explorer",
+        "title": "Weaver",
+        "icon": "media/heart.svg"
         }
       ]
     },
     "views": {
-      "weaver-sidebar-view": [
+      "weaver-explorer": [
         {
           "type": "webview",
-          "id": "weaver-sidebar",
-          "name": "weaver",
-          "icon": "media/heart.svg",
-          "contextualTitle": "weaver"
+          "id": "e-weaver",
+          "name": "Weaver",
+          "icon": "./media/heart.svg"
         }
       ]
     }
