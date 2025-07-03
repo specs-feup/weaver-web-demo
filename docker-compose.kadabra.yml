@@ -3,6 +3,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        TOOL_NAME: kadabra
     container_name: openvscode-server
     ports:
       - "3000:3000"
