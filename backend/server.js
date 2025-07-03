@@ -6,6 +6,7 @@ import 'dotenv/config';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
+const TOOL = process.env.TOOL;
 
 app.use(cors());
 app.use(json());
@@ -14,12 +15,13 @@ app.get('/api/status', (req, res) => {
   res.json({ status: 'Backend is running!' });
 });
 
-app.get('/clava', (req, res) => {
-  const command = 'clava --version';
+app.get(`/${TOOL}`, (req, res) => {
+
+  const command = `${TOOL} --version`;
 
   exec(command, (error, stdout, stderr) => {
     if (error) {
-      console.error('Clava error:', error);
+      console.error(`${TOOL} error`, error);
       return res.status(500).json({ error: error.message });
     }
 
