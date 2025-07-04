@@ -1,8 +1,7 @@
-// backend/server.js
 import 'dotenv/config';
 import cors from 'cors';
 import multer from 'multer';
-import express, { json } from 'express';
+import express from 'express';
 import { exec } from 'child_process';
 import { runWeaver } from './weaver.js';
 
@@ -13,14 +12,13 @@ const TOOL = process.env.TOOL;
 const upload = multer({ dest: 'uploads/' });
 
 app.use(cors());
-app.use(json());
+app.use(express.json());
 
 app.get('/api/status', (req, res) => {
   res.json({ status: 'Backend is running!' });
 });
 
 app.get(`/${TOOL}`, (req, res) => {
-
   const command = `${TOOL} --version`;
 
   exec(command, (error, stdout, stderr) => {
@@ -37,11 +35,16 @@ app.get(`/${TOOL}`, (req, res) => {
 });
 
 app.post('/api/weave', upload.single('zipfile'), (req, res) => {
-
+  
   if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
-
+  else res.json({ message: 'File received', file: req.file });
+  
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Backend listening at http://localhost:${PORT}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`🚀 Backend listening at http://localhost:${PORT}`);
+  });
+}
+
+export default app;
