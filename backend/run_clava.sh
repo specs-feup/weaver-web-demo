@@ -1,1 +1,2 @@
-docker-compose -f docker-compose.yml -f docker-compose.clava.yml up --build
+#!/bin/bash
+TOOL=clava docker-compose up --build
