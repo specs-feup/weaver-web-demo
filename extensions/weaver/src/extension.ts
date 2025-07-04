@@ -97,26 +97,36 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
 	private getDropDownStyle(): string {
 		const tool = process.env.TOOL_NAME;
 		return (tool === "clava")? `
-		.custom-select {
-			min-width: 200;
-			position: relative;
-		}
-
 		.custom-select select {
 			appearance: none;
-			width: 100%;
-			font-size: 0.80rem;
-			padding: 0.675em 6em 0.675em 1em;
-			background-color: #fff;
-			border: 1px solid #caced1;
-			border-radius: 0.25rem;
-			color: #000;
+			-webkit-appearance: none;
+			-moz-appearance: no				
+			background-color: #ffe5e5;   /* Light red background */
+			color: #660000;              /* Dark red text */
+			border: 1px solid #ff9999;   /* Soft red border */
+			border-radius: 6px;
+			padding: 0.6em 1em;
+			font-size: 0.9rem;
+			font-family: inherit;
 			cursor: pointer;
+			transition: background-color 0.2s ease, border-color 0.2s ease;
+		}
+
+		.custom-select select:hover {
+			background-color: #ffd6d6;   /* Slightly darker on hover */
+			border-color: #ff6666;
+		}
+
+		.custom-select select:focus {
+			outline: none;
+			background-color: #ffcccc;
+			border-color: #ff3333;
+			box-shadow: 0 0 0 2px rgba(255, 51, 51, 0.2);
 		}
 
 		.custom-select::before,
 		.custom-select::after {
-			--size: 0.2rem;
+			--size: 0.3rem;
 			content: "";
 			position: absolute;
 			right: 1rem;
@@ -126,9 +136,22 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
 		.custom-select::before {
 			border-left: var(--size) solid transparent;
 			border-right: var(--size) solid transparent;
-			border-bottom: var(--size) solid black;
+			border-bottom: var(--size) solid #660000;
 			top: 40%;
 		}
+
+		.custom-select::after {
+			border-left: var(--size) solid transparent;
+			border-right: var(--size) solid transparent;
+			border-top: var(--size) solid #660000;
+			top: 55%;
+		}
+
+		.custom-select {
+			position: relative;
+			min-width: 200px;
+		}
+
 
 		.custom-select::after {
 			border-left: var(--size) solid transparent;
