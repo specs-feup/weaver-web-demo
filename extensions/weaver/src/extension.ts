@@ -100,7 +100,7 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
 		.custom-select select {
 			appearance: none;
 			-webkit-appearance: none;
-			-moz-appearance: no				
+			-moz-appearance: none;				
 			background-color: #ffe5e5;   /* Light red background */
 			color: #660000;              /* Dark red text */
 			border: 1px solid #ff9999;   /* Soft red border */
