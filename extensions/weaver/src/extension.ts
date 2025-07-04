@@ -60,55 +60,37 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
 	private getWeaveButtonStyle(): string {
 		const tool = process.env.TOOL_NAME;
 		const style = `
-			.weaver-button {
-				align-items: center;
-				background-image: linear-gradient(144deg,#AF40FF, #5B42F3 50%,#00DDEB);
-				border: 0;
-				border-radius: 8px;
-				box-shadow: rgba(151, 65, 252, 0.2) 0 15px 30px -5px;
-				box-sizing: border-box;
-				color: #FFFFFF;
-				display: flex;
-				font-family: Phantomsans, sans-serif;
-				font-size: 20px;
-				justify-content: center;
-				line-height: 1em;
-				max-width: 100%;
-				min-width: 140px;
-				padding: 3px;
-				text-decoration: none;
-				user-select: none;
-				-webkit-user-select: none;
-				touch-action: manipulation;
-				white-space: nowrap;
-				cursor: pointer;
-			}
+.weaver-button {
+	background-color: initial;
+	background-image: linear-gradient(-180deg, #FF7E31, #E62C03);
+	border-radius: 6px;
+	box-shadow: rgba(0, 0, 0, 0.1) 0 2px 4px;
+	color: #FFFFFF;
+	cursor: pointer;
+	display: inline-block;
+	font-family: Inter,-apple-system,system-ui,Roboto,"Helvetica Neue",Arial,sans-serif;
+	height: 40px;
+	line-height: 40px;
+	outline: 0;
+	overflow: hidden;
+	padding: 0 20px;
+	pointer-events: auto;
+	position: relative;
+	text-align: center;
+	touch-action: manipulation;
+	user-select: none;
+	-webkit-user-select: none;
+	vertical-align: top;
+	white-space: nowrap;
+	width: 100%;
+	z-index: 9;
+	border: 0;
+	transition: box-shadow .2s;
+}
 
-			.weaver-button:active,
-			.weaver-button:hover {
-				outline: 0;
-			}
-
-			.weaver-button span {
-				background-color: rgb(5, 6, 45);
-				padding: 16px 24px;
-				border-radius: 6px;
-				width: 100%;
-				height: 100%;
-				transition: 300ms;
-			}
-
-			.weaver-button:hover span {
-				background-color: rgba(255, 255, 255, 0.1);
-				transform: scale(1.05);
-			}
-
-			@media (min-width: 768px) {
-				.weaver-button {
-					font-size: 24px;
-					min-width: 196px;
-				}
-			}`;
+.weaver-button:hover {
+	box-shadow: rgba(253, 76, 0, 0.5) 0 3px 8px;
+}`;
 		return style;
 	}
 
@@ -186,6 +168,8 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
 
 		const tool = process.env.TOOL_NAME;
 		const img_disk = vscode.Uri.joinPath(this.extensionUri, 'media', `${tool}.png`);
+		const img_width = "168";
+		let img_height = (tool === "clava")? "46" : "38"; 
 		const path = webview.asWebviewUri(img_disk);
 		
 		return `
@@ -194,7 +178,7 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
 			<body>
 				<div style = "max-width:fit-content; margin-left:auto; margin-right:auto; display:flex; flex-direction: column; gap: 10px; padding: 10px">
 
-					<img src= ${path} alt="${tool}" width="168" height="33">
+					<img src= ${path} alt="${tool}" width=${img_width} height=${img_height}>
 
 					<style>
 						${this.getDropDownStyle()}
