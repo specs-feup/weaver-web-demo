@@ -1,2 +1,2 @@
 #!/bin/bash
-TOOL=clava docker-compose up --build
+TOOL=clava EXT=.js docker-compose up --build

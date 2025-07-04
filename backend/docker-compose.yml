@@ -5,6 +5,7 @@ services:
       dockerfile: Dockerfile
       args:
         TOOL: ${TOOL}
+        EXT: ${EXT}
     environment:
       - TOOL=${TOOL}
     ports:

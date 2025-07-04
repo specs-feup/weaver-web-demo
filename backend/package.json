@@ -2,9 +2,6 @@
   "name": "backend",
   "version": "1.0.0",
   "main": "index.js",
-  "scripts": {
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest"
-  },
   "type": "module",
   "keywords": [],
   "author": "",
@@ -17,9 +14,5 @@
     "express": "^5.1.0",
     "multer": "^2.0.1",
     "unzipper": "^0.12.3"
-  },
-  "devDependencies": {
-    "jest": "^30.0.4",
-    "supertest": "^7.1.1"
   }
 }
