@@ -63,6 +63,7 @@ export async function runWeaver(tool, inputFile, scriptFile, standard, tempDir =
     // The woven code will be saved in the temp/woven_code folder
     const command = `${tool} classic ${scriptFile} -p ${inputPath} -o ${tempDir} -std ${standard}`;
     console.log(`Running command: ${command}`);
+
     const log = await new Promise((resolve, reject) => {
         exec(command, (error, stdout, stderr) => {
             if (stderr && stderr.includes("error")) { // This is gonna stay like this for now, because docker doesnt like my M1 chip
@@ -72,8 +73,8 @@ export async function runWeaver(tool, inputFile, scriptFile, standard, tempDir =
         });
     });
 
-    const outputZip = path.join(tempDir, "output.zip");
-    await zipFolder(`${tempDir}woven_code`, outputZip);
+    const outputZipPath = path.join(tempDir, "output.zip");
+    await zipFolder(`${tempDir}woven_code`, outputZipPath);
 
     return log;
 }

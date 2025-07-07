@@ -4,7 +4,6 @@ import cors from 'cors';
 import path from 'path';
 import multer from 'multer';
 import express from 'express';
-import { exec } from 'child_process';
 import { runWeaver } from './weaver.js';
 
 const app = express();
@@ -20,6 +19,7 @@ const storage = multer.diskStorage({
     cb(null, `${tempDir}/uploads/`);
   },
   filename: function (req, file, cb) {
+
     // this attaches the correct file extension to the uploaded file
     // we do this because clava requires the script file to be .js
     const extension = path.extname(file.originalname);
@@ -42,20 +42,9 @@ if (process.env.NODE_ENV !== 'test') {
   });
 }
 
-app.get(`/api/:tool`, (req, res) => {
-  const tool = req.params.tool || process.env.TOOL;
-
-  exec(command, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`${tool} error`, error);
-      return res.status(500).json({ error: error.message });
-    }
-
-    res.json({
-      stdout: stdout.trim(),
-      stderr: stderr.trim(),
-    });
-  });
+app.get('/api/download/:filename', (req, res) => {
+  const filePath = path.join(tempDir, req.params.filename);
+  res.download(filePath);
 });
 
 app.post(
@@ -79,7 +68,8 @@ app.post(
     .then((log) => {
       console.log('Weaver tool executed successfully');
       res.status(200).json({
-        log: log
+        log: log,
+        outputFile: `api/download/output.zip`,
       });
     })
     .catch((error) => {
