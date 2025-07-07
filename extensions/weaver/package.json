@@ -20,7 +20,7 @@
         {
           "id": "weaver-explorer",
           "title": "Weaver",
-          "icon": "media/heart.svg"
+          "icon": "media/specs_icon.png"
         }
       ]
     },
@@ -33,14 +33,7 @@
           "icon": "./media/heart.svg"
         }
       ]
-    },
-    "themes": [
-    {
-      "label": "Light Red Theme",
-      "uiTheme": "vs", 
-      "path": "./themes/Light Red Theme-color-theme.json"
     }
-  ]
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
