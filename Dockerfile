@@ -1,9 +1,9 @@
 FROM gitpod/openvscode-server:latest
 
 # This will be replaced by the tool name when building the image through docker-compose
-ARG TOOL_NAME=placeholder
+ARG TOOL=placeholder
 
-ENV TOOL_NAME=${TOOL_NAME}
+ENV TOOL_NAME=${TOOL}
 
 # Set the working directory
 WORKDIR /home/workspace
