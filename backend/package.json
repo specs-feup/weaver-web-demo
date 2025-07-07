@@ -8,6 +8,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@specs-feup/clava": "^3.0.17",
     "archiver": "^7.0.1",
     "cors": "^2.8.5",
     "dotenv": "^17.0.1",

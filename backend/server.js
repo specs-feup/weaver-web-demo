@@ -1,16 +1,33 @@
+import fs from 'fs';
 import 'dotenv/config';
 import cors from 'cors';
+import path from 'path';
 import multer from 'multer';
-import fs from 'fs/promises';
 import express from 'express';
 import { exec } from 'child_process';
 import { runWeaver } from './weaver.js';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
-const extension = process.env.EXT;
+const tempDir = 'temp';
 
-const upload = multer({ dest: 'uploads/' });
+const storage = multer.diskStorage({
+  destination: function (req, file, cb){
+    if(!fs.existsSync(`${tempDir}/uploads/`)) {
+      fs.mkdirSync(`${tempDir}/uploads/`, { recursive: true });
+    }
+
+    cb(null, `${tempDir}/uploads/`);
+  },
+  filename: function (req, file, cb) {
+    // this attaches the correct file extension to the uploaded file
+    // we do this because clava requires the script file to be .js
+    const extension = path.extname(file.originalname);
+    cb(null, file.fieldname + '-' + Date.now() + extension);
+  }
+})
+
+const upload = multer({ storage: storage });
 
 app.use(cors());
 app.use(express.json());

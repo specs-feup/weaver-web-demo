@@ -53,19 +53,16 @@ function createLog(stdout, stderr) {
  * @param {*} inputFile The input files to be processed by the Weaver tool (can be a single file or a folder) 
  * @param {*} outputFile The output zip file where the results will be saved
  */
-export async function runWeaver(tool, inputFile, scriptFile, standard) {
-    const tempDir = 'temp/';
-    if (!fs.existsSync(tempDir)) {
-        fs.mkdirSync(tempDir);
-    }
+export async function runWeaver(tool, inputFile, scriptFile, standard, tempDir = 'temp/') {
 
     // Create the input and output directories
     const inputPath = path.join(tempDir, "input");
-    //await unzipFile(inputFile, inputPath);
+    await unzipFile(inputFile, inputPath);
     const outputPath = path.join(tempDir, "output");
 
     // Run command
-    const command = `${tool} classic tests/main.js -p ${inputPath} -o ${outputPath}/woven_code -std ${standard}`;
+    // The woven code will be saved in the temp/woven_code folder
+    const command = `${tool} classic ${scriptFile} -p ${inputPath} -o ${outputPath} -std ${standard}`;
     console.log(`Running command: ${command}`);
     const log = await new Promise((resolve, reject) => {
         exec(command, (error, stdout, stderr) => {
@@ -77,7 +74,7 @@ export async function runWeaver(tool, inputFile, scriptFile, standard) {
     });
 
     const outputZip = path.join(tempDir, "output.zip");
-    await zipFolder(`${outputPath}/woven_code`, outputZip);
+    await zipFolder(`${outputPath}`, outputZip);
 
     return log;
 }
