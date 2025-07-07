@@ -58,11 +58,10 @@ export async function runWeaver(tool, inputFile, scriptFile, standard, tempDir =
     // Create the input and output directories
     const inputPath = path.join(tempDir, "input");
     await unzipFile(inputFile, inputPath);
-    const outputPath = path.join(tempDir, "output");
 
     // Run command
     // The woven code will be saved in the temp/woven_code folder
-    const command = `${tool} classic ${scriptFile} -p ${inputPath} -o ${outputPath} -std ${standard}`;
+    const command = `${tool} classic ${scriptFile} -p ${inputPath} -o ${tempDir} -std ${standard}`;
     console.log(`Running command: ${command}`);
     const log = await new Promise((resolve, reject) => {
         exec(command, (error, stdout, stderr) => {
@@ -74,7 +73,7 @@ export async function runWeaver(tool, inputFile, scriptFile, standard, tempDir =
     });
 
     const outputZip = path.join(tempDir, "output.zip");
-    await zipFolder(`${outputPath}`, outputZip);
+    await zipFolder(`${tempDir}woven_code`, outputZip);
 
     return log;
 }
