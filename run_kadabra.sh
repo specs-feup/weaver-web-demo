@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker-compose -f docker-compose.yml -f docker-compose.kadabra.yml up --build
+TOOL=kadabra docker-compose up --build
