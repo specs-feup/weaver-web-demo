@@ -82,7 +82,7 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
 	-webkit-user-select: none;
 	vertical-align: top;
 	white-space: nowrap;
-	width: 100%;
+	width: 234px;
 	z-index: 9;
 	border: 0;
 	transition: box-shadow .2s;
@@ -149,7 +149,7 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
 
 		.custom-select {
 			position: relative;
-			min-width: 200px;
+			min-width: 230px;
 		}
 
 

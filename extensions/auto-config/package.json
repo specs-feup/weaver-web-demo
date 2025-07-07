@@ -19,6 +19,18 @@
         "command": "auto-config.UpdateWorkspaceSettings",
         "title": "UpdateWorkspaceSettings"
       }
+    ],
+    "themes": [
+      {
+        "label": "Light Red Theme",
+        "uiTheme": "vs",
+        "path": "./themes/Light Red Theme.json"
+      },
+      {
+        "label": "Light Yellow Theme",
+        "uiTheme": "vs",
+        "path": "./themes/Light Yellow Theme.json"
+      }
     ]
   },
   "scripts": {

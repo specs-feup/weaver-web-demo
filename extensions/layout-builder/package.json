@@ -19,13 +19,6 @@
         "command": "2x2-grid",
         "title": "Grid-2x2"
       }
-    ],
-    "themes": [
-      {
-        "label": "Light Red Theme",
-        "uiTheme": "vs",
-        "path": "./themes/Light Red Theme.json"
-      }
     ]
   },
   "scripts": {
