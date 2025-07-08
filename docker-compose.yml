@@ -15,13 +15,14 @@ services:
       - .:/home/workspace:cached
       - ./custom-workspace-settings.json:/home/workspace/.vscode/custom-workspace-settings.json
       - ./custom-user-settings.json:/home/workspace/.vscode/custom-user-settings.json
-    command: ["openvscode-server",
-     "--without-connection-token",
-     "--default-workspace", "/home/workspace/files",
-     "--default-folder", "/home/workspace/files",
-     "--install-extension", "/tmp/exts/layout-builder-0.0.1.vsix",
-     "--install-extension", "/tmp/exts/auto-config-0.0.1.vsix",
-     "--install-extension", "/tmp/exts/weaver-0.0.1.vsix",
-     "--disable-workspace-trust",
-     "--start-server"
+    entrypoint: []
+    command: ["/bin/sh", "-c", 
+      "for ext in /tmp/exts/*.vsix; do echo Installing $$ext; /home/.openvscode-server/bin/openvscode-server --install-extension $$ext; done && 
+      exec /home/.openvscode-server/bin/openvscode-server
+      --host 0.0.0.0 
+      --without-connection-token 
+      --default-workspace /home/workspace/files 
+      --default-folder /home/workspace/files 
+      --disable-workspace-trust 
+      --start-server"
     ]
