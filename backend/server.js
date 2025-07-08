@@ -46,6 +46,12 @@ app.get('/api/status', (req, res) => {
 
 app.get('/api/download/:filename', (req, res) => {
   const filePath = path.join(tempDir, req.params.filename);
+
+  // Check if the file exists
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ error: 'File not found' });
+  }
+  
   res.download(filePath);
 });
 

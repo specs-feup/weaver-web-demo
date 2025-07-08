@@ -72,15 +72,18 @@ async function runWeaver(tool, inputFile, scriptFile, standard, tempDir = 'temp/
 
     const log = await new Promise((resolve, reject) => {
         exec(command, (error, stdout, stderr) => {
-            if (stderr && stderr.includes("error")) { // This is gonna stay like this for now, because docker doesnt like my M1 chip
-                return reject(new Error(`Weaver tool failed: ${error}`));
+            if (error) {
+                return reject(new Error(`Weaver tool failed: ${error.message}`));
+            }
+            if (stderr && stderr.includes("error")) {
+                return reject(new Error(`Weaver tool stderr contains error: ${stderr}`));
             }
             resolve(createLog(stdout, stderr));
         });
     });
 
     const outputZipPath = path.join(tempDir, "output.zip");
-    await zipFolder(`${tempDir}woven_code`, outputZipPath);
+    await zipFolder(path.join(tempDir, 'woven_code'), outputZipPath);
 
     return log;
 }

@@ -150,7 +150,7 @@ describe('Weaver Functions', () => {
 
       // Verify that archiver was called
       expect(archiver).toHaveBeenCalledWith('zip', { zlib: { level: 9 } });
-      expect(mockArchive.directory).toHaveBeenCalledWith(`${testTempDir}woven_code`, false);
+      expect(mockArchive.directory).toHaveBeenCalledWith(`${testTempDir}/woven_code`, false);
       expect(mockArchive.finalize).toHaveBeenCalled();
     });
 
