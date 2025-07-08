@@ -2,11 +2,11 @@
 This file provides the functions needed to Weave the input files received by the backend server.
 */
 
-import fs from 'fs';
-import unzipper from 'unzipper';
-import { exec } from 'child_process';
-import path from 'path';
-import archiver from 'archiver';
+const fs = require('fs');
+const unzipper = require('unzipper');
+const { exec } = require('child_process');
+const path = require('path');
+const archiver = require('archiver');
 
 /**
  * Unzips a zip file to a target directory using unzipper.
@@ -56,7 +56,7 @@ function createLog(stdout, stderr) {
  * @param {*} inputFile The input files to be processed by the Weaver tool (can be a single file or a folder) 
  * @param {*} outputFile The output zip file where the results will be saved
  */
-export async function runWeaver(tool, inputFile, scriptFile, standard, tempDir = 'temp/') {
+async function runWeaver(tool, inputFile, scriptFile, standard, tempDir = 'temp/') {
 
     // Create the input and output directories
     const inputPath = path.join(tempDir, "input");
@@ -81,3 +81,7 @@ export async function runWeaver(tool, inputFile, scriptFile, standard, tempDir =
 
     return log;
 }
+
+module.exports = {
+    runWeaver
+};

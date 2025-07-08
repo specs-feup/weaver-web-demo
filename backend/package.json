@@ -2,11 +2,15 @@
   "name": "backend",
   "version": "1.0.0",
   "main": "index.js",
-  "type": "module",
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
+  "scripts": {
+    "test": "jest --detectOpenHandles",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
   "dependencies": {
     "@specs-feup/clava": "^3.0.17",
     "archiver": "^7.0.1",
@@ -15,5 +19,10 @@
     "express": "^5.1.0",
     "multer": "^2.0.1",
     "unzipper": "^0.12.3"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "jest": "^30.0.4",
+    "supertest": "^7.1.3"
   }
 }

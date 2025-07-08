@@ -1,10 +1,10 @@
-import fs from 'fs';
-import 'dotenv/config';
-import cors from 'cors';
-import path from 'path';
-import multer from 'multer';
-import express from 'express';
-import { runWeaver } from './weaver.js';
+const fs = require('fs');
+require('dotenv/config');
+const cors = require('cors');
+const path = require('path');
+const multer = require('multer');
+const express = require('express');
+const { runWeaver } = require('./weaver.js');
 
 const app = express();
 app.use(cors());
@@ -34,9 +34,11 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 
-app.listen(PORT, () => {
-  console.log(`🚀 Backend listening at http://localhost:${PORT}`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`🚀 Backend listening at http://localhost:${PORT}`);
+  });
+}
 
 app.get('/api/status', (req, res) => {
   res.json({ status: 'Backend is running!' });
@@ -78,4 +80,4 @@ app.post(
     });
 });
 
-export default app;
+module.exports = app;
