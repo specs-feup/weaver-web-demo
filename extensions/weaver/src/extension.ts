@@ -80,7 +80,6 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
 	touch-action: manipulation;
 	user-select: none;
 	-webkit-user-select: none;
-	vertical-align: middle;
 	white-space: nowrap;
 	z-index: 9;
 	border: 0;
@@ -198,9 +197,9 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
 		<!DOCTYPE html>
 		<html lang="en">
 			<body>
-				<div style = "max-width:fit-content; display:flex; flex-direction: column; padding: 10px">
+				<div style = "max-width:fit-content; display:flex; flex-direction: column; gap: 30px; padding: 10px">
 
-					<div style = "display:flex; flex-direction: row; align-items: center">
+					<div style = "display:flex; flex-direction: row; justify-content: center">
 						<img src= ${path} alt="${tool}" width=${img_width} height=${img_height}>
 					</div>
 
@@ -216,6 +215,11 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
 					</script>
 
 					${this.getDropdown()}
+
+					<div style = "display: flex; flex-direction: column; gap: 10px; align-items: center; margin-top: auto; margin-bottom: 10px">
+						<img src= ${webview.asWebviewUri(vscode.Uri.joinPath(this.extensionUri, 'media', `SPeCS-logo.png`))} alt="SPeCS-logo" width=234 height=93>
+						<img src= ${webview.asWebviewUri(vscode.Uri.joinPath(this.extensionUri, 'media', `feup-logo.png`))} alt="SPeCS-logo" width=234 height=81>
+					</div>
 				</div>
 			</body>
 		</html>
