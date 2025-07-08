@@ -32,8 +32,8 @@ for (const $function of Query.search("function")) {
 println('// Copy this code, open the web page http://webgraphviz.com/, paste the code and click Generate Graph!');
 println('digraph static_call_graph {\n');
 
-for (f in callGraph) {
-    for (c in callGraph[f]) {
+for (const f in callGraph) {
+    for (const c in callGraph[f]) {
         println('\t"' + f + '"->"' + c + '" [label="' + callGraph[f][c] + '"];');
     }
 }

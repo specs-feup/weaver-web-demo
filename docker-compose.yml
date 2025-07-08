@@ -13,7 +13,7 @@ services:
       - TOOL_NAME=${TOOL}
     volumes:
       - .:/home/workspace:cached
-      - ./custom-workplace-settings.json:/home/workspace/.vscode/custom-workplace-settings.json
+      - ./custom-workspace-settings.json:/home/workspace/.vscode/custom-workspace-settings.json
       - ./custom-user-settings.json:/home/workspace/.vscode/custom-user-settings.json
     command: ["openvscode-server",
      "--without-connection-token",

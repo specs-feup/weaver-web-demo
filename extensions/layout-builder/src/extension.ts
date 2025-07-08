@@ -9,13 +9,17 @@ export async function activate(context: vscode.ExtensionContext) {
 
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
 
+    if (!workspaceFolder) {
+        console.error('No workspace folder is open. The "layout-builder" extension requires an open workspace.');
+        return;
+    }
     const uris = [
-        vscode.Uri.joinPath(workspaceFolder!.uri, 'input/input.cpp'),
-        vscode.Uri.joinPath(workspaceFolder!.uri, 'script.js'),
-        vscode.Uri.joinPath(workspaceFolder!.uri, 'result.cpp'),
-        vscode.Uri.joinPath(workspaceFolder!.uri, 'log.txt')
+        vscode.Uri.joinPath(workspaceFolder.uri, 'input/input.cpp'),
+        vscode.Uri.joinPath(workspaceFolder.uri, 'script.js'),
+        vscode.Uri.joinPath(workspaceFolder.uri, 'result.cpp'),
+        vscode.Uri.joinPath(workspaceFolder.uri, 'log.txt')
     ];
-
+    
     // Assemble the 2x2 grid
     await setup2x2Grid(uris);
 
