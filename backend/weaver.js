@@ -61,6 +61,11 @@ function createLog(stdout, stderr) {
  */
 async function runWeaver(tool, inputFile, scriptFile, standard, tempDir = 'temp/') {
 
+    // Throw error if any of the required parameters are missing
+    if (!tool || !inputFile || !scriptFile || !standard) {
+        throw new Error("Missing required parameters: tool, inputFile, scriptFile, or standard");
+    }
+
     // Create the input and output directories
     const inputPath = path.join(tempDir, "input");
     await unzipFile(inputFile, inputPath);

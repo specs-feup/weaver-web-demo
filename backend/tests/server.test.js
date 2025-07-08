@@ -99,7 +99,7 @@ describe('Server API Tests', () => {
 
     it('should handle weaver errors', async () => {
       // Mock weaver failure
-      runWeaver.mockRejectedValue(new Error('Weaver tool failed'));
+      runWeaver.mockRejectedValue(new Error('An internal server error occurred. Please try again later.'));
 
       const testZipContent = Buffer.from('test zip content');
       const testJsContent = Buffer.from('console.log("test");');
@@ -112,7 +112,7 @@ describe('Server API Tests', () => {
         .expect(500);
 
       expect(response.body).toEqual({
-        error: 'Weaver tool failed'
+        error: 'An internal server error occurred. Please try again later.'
       });
     });
 

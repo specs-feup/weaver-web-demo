@@ -74,6 +74,96 @@ describe('Weaver Functions', () => {
   });
 
   describe('runWeaver', () => {
+    describe('Parameter validation', () => {
+      it('should throw error when tool parameter is missing', async () => {
+        await expect(
+          runWeaver(null, testInputFile, testScriptFile, testStandard, testTempDir)
+        ).rejects.toThrow('Missing required parameters: tool, inputFile, scriptFile, or standard');
+      });
+
+      it('should throw error when tool parameter is empty string', async () => {
+        await expect(
+          runWeaver('', testInputFile, testScriptFile, testStandard, testTempDir)
+        ).rejects.toThrow('Missing required parameters: tool, inputFile, scriptFile, or standard');
+      });
+
+      it('should throw error when inputFile parameter is missing', async () => {
+        await expect(
+          runWeaver(testTool, null, testScriptFile, testStandard, testTempDir)
+        ).rejects.toThrow('Missing required parameters: tool, inputFile, scriptFile, or standard');
+      });
+
+      it('should throw error when inputFile parameter is undefined', async () => {
+        await expect(
+          runWeaver(testTool, undefined, testScriptFile, testStandard, testTempDir)
+        ).rejects.toThrow('Missing required parameters: tool, inputFile, scriptFile, or standard');
+      });
+
+      it('should throw error when scriptFile parameter is missing', async () => {
+        await expect(
+          runWeaver(testTool, testInputFile, null, testStandard, testTempDir)
+        ).rejects.toThrow('Missing required parameters: tool, inputFile, scriptFile, or standard');
+      });
+
+      it('should throw error when scriptFile parameter is empty string', async () => {
+        await expect(
+          runWeaver(testTool, testInputFile, '', testStandard, testTempDir)
+        ).rejects.toThrow('Missing required parameters: tool, inputFile, scriptFile, or standard');
+      });
+
+      it('should throw error when standard parameter is missing', async () => {
+        await expect(
+          runWeaver(testTool, testInputFile, testScriptFile, null, testTempDir)
+        ).rejects.toThrow('Missing required parameters: tool, inputFile, scriptFile, or standard');
+      });
+
+      it('should throw error when standard parameter is undefined', async () => {
+        await expect(
+          runWeaver(testTool, testInputFile, testScriptFile, undefined, testTempDir)
+        ).rejects.toThrow('Missing required parameters: tool, inputFile, scriptFile, or standard');
+      });
+
+      it('should throw error when multiple parameters are missing', async () => {
+        await expect(
+          runWeaver(null, null, testScriptFile, testStandard, testTempDir)
+        ).rejects.toThrow('Missing required parameters: tool, inputFile, scriptFile, or standard');
+      });
+
+      it('should throw error when all required parameters are missing', async () => {
+        await expect(
+          runWeaver(null, null, null, null, testTempDir)
+        ).rejects.toThrow('Missing required parameters: tool, inputFile, scriptFile, or standard');
+      });
+
+      it('should NOT throw error when tempDir is missing (has default value)', async () => {
+        exec.mockImplementation((command, callback) => {
+          callback(null, 'Done', '');
+        });
+
+        // This should work because tempDir has a default value
+        await expect(
+          runWeaver(testTool, testInputFile, testScriptFile, testStandard)
+        ).resolves.toContain('Done');
+      });
+
+      it('should work with all valid parameters including tempDir', async () => {
+        exec.mockImplementation((command, callback) => {
+          callback(null, 'Processing complete: Done', '');
+        });
+
+        const result = await runWeaver(
+          testTool, 
+          testInputFile, 
+          testScriptFile, 
+          testStandard, 
+          testTempDir
+        );
+
+        expect(result).toContain('Done');
+        expect(exec).toHaveBeenCalledTimes(1);
+      });
+    });
+
     it('should execute weaver command successfully and return Done log', async () => {
       // Mock successful exec with "Done" in stdout
       exec.mockImplementation((command, callback) => {
