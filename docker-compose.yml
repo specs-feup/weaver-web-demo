@@ -15,7 +15,7 @@ services:
       - .:/home/workspace:cached
       - ./custom-workspace-settings.json:/home/workspace/.vscode/custom-workspace-settings.json
       - ./custom-user-settings.json:/home/workspace/.vscode/custom-user-settings.json
-    entrypoint: []
+    entrypoint: [] # Clear the default entrypoint to use a custom command
     command: ["/bin/sh", "-c", 
       "for ext in /tmp/exts/*.vsix; do echo Installing $$ext; /home/.openvscode-server/bin/openvscode-server --install-extension $$ext; done && 
       exec /home/.openvscode-server/bin/openvscode-server

@@ -61,14 +61,14 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
 		const tool = process.env.TOOL_NAME;
 		const style = `
 .weaver-button {
-	background-color: initial;
-	background-image: linear-gradient(-180deg, #FF7E31, #E62C03);
+	background-color:  #992222;
 	border-radius: 6px;
 	box-shadow: rgba(0, 0, 0, 0.1) 0 2px 4px;
 	color: #FFFFFF;
 	cursor: pointer;
 	display: inline-block;
 	font-family: Inter,-apple-system,system-ui,Roboto,"Helvetica Neue",Arial,sans-serif;
+	width: 234px;
 	height: 40px;
 	line-height: 40px;
 	outline: 0;
@@ -80,9 +80,8 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
 	touch-action: manipulation;
 	user-select: none;
 	-webkit-user-select: none;
-	vertical-align: top;
+	vertical-align: middle;
 	white-space: nowrap;
-	width: 234px;
 	z-index: 9;
 	border: 0;
 	transition: box-shadow .2s;
@@ -199,9 +198,11 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
 		<!DOCTYPE html>
 		<html lang="en">
 			<body>
-				<div style = "max-width:fit-content; margin-left:auto; margin-right:auto; display:flex; flex-direction: column; gap: 10px; padding: 10px">
+				<div style = "max-width:fit-content; display:flex; flex-direction: column; padding: 10px">
 
-					<img src= ${path} alt="${tool}" width=${img_width} height=${img_height}>
+					<div style = "display:flex; flex-direction: row; align-items: center">
+						<img src= ${path} alt="${tool}" width=${img_width} height=${img_height}>
+					</div>
 
 					<style>
 						${this.getDropDownStyle()}

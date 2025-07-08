@@ -2,9 +2,9 @@
   "name": "Light Red Theme",
   "type": "light",
   "colors": {
-    "activityBar.background": "#992222",
-    "activityBar.foreground": "#ffffff", 
-    "sideBar.background": "#ffc0c0",
+    "activityBar.background": "#d3d3d3",
+    "activityBar.foreground": "#000000", 
+    "sideBar.background": "#ffffff",
     "sideBar.foreground": "#440000",
     "statusBar.background": "#992222",
     "statusBar.foreground": "#ffffff",
