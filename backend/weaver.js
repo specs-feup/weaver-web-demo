@@ -41,7 +41,10 @@ function zipFolder(sourceFolder, outPath) {
 }
 
 /**
- * This function concatenates the stdout and stderr streams of the Weaver tool and returns a string.
+ * Returns the concatenated log string from stdout and stderr.
+ * @param {*} stdout The standard output from the Weaver tool
+ * @param {*} stderr The standard error output from the Weaver tool
+ * @returns 
  */
 function createLog(stdout, stderr) {
     return `stdout: ${stdout}\n\nstderr: ${stderr}`;

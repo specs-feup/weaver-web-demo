@@ -1,2 +1,2 @@
 #!/bin/bash
-TOOL=kadabra EXT=.java docker-compose up --build
+TOOL=kadabra docker-compose up --build

@@ -7,7 +7,11 @@ import express from 'express';
 import { runWeaver } from './weaver.js';
 
 const app = express();
+app.use(cors());
+app.use(express.json());
+
 const PORT = process.env.PORT || 4000;
+
 const tempDir = 'temp';
 
 const storage = multer.diskStorage({
@@ -29,18 +33,14 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-app.use(cors());
-app.use(express.json());
+
+app.listen(PORT, () => {
+  console.log(`🚀 Backend listening at http://localhost:${PORT}`);
+});
 
 app.get('/api/status', (req, res) => {
   res.json({ status: 'Backend is running!' });
 });
-
-if (process.env.NODE_ENV !== 'test') {
-  app.listen(PORT, () => {
-    console.log(`🚀 Backend listening at http://localhost:${PORT}`);
-  });
-}
 
 app.get('/api/download/:filename', (req, res) => {
   const filePath = path.join(tempDir, req.params.filename);
