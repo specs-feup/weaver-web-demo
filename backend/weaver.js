@@ -52,9 +52,12 @@ function createLog(stdout, stderr) {
 
 /**
  * 
- * @param {*} tool Weaver tool to run (Clava, Kadabra, etc...)
- * @param {*} inputFile The input files to be processed by the Weaver tool (can be a single file or a folder) 
- * @param {*} outputFile The output zip file where the results will be saved
+ * @param {*} tool The Weaver tool to use (e.g., 'clava')
+ * @param {*} inputFile The input file to weave, which is a zip file that will be unzipped
+ * @param {*} scriptFile The javascript file to use for weaving
+ * @param {*} standard The standard to use for weaving (e.g., 'c++11')
+ * @param {*} tempDir The temporary directory to use for input and output files (default is 'temp/')
+ * @returns {Promise<string>} A promise that resolves to the log string from the Weaver tool
  */
 async function runWeaver(tool, inputFile, scriptFile, standard, tempDir = 'temp/') {
 
