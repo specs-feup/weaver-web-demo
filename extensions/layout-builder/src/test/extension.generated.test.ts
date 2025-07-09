@@ -164,7 +164,7 @@ describe('Extension', () => {
       );
       expect(vscode.Uri.joinPath).toHaveBeenCalledWith(
         vscode.workspace.workspaceFolders![0].uri,
-        'result.cpp'
+        'result/result.cpp'
       );
       expect(vscode.Uri.joinPath).toHaveBeenCalledWith(
         vscode.workspace.workspaceFolders![0].uri,

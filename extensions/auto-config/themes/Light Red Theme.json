@@ -12,6 +12,7 @@
     "titleBar.activeForeground": "#ffffff",
     "button.background": "#ff9999",
     "button.hoverBackground": "#ff6666",
+    "button.foreground": "#ffffff",
     "dropdown.background": "#ffe5e5",
     "dropdown.border": "#ffcccc",
     "dropdown.foreground": "#660000",
