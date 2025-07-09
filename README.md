@@ -22,19 +22,21 @@ Web demo for weavers based on the LARA Framework.
 
 ## Backend Requirements
 
-### 1. Server Communication
+### 1. Server-Side Execution
 
 - **Platform:** Node.js backend.
 - **API Endpoint:** Receives input + script files from frontend and handles analysis request.
-- **WebSocket Communication:**
-  - Opens a WebSocket to the remote server running the analysis tools.
-  - Sends a request containing:
-    - Input code
-    - JS specification
-    - Selected language standard/tool
-  - Listens for:
-    - Analysis results
-    - Stdout/stderr logs
+- **Tool Execution:**
+    - Upon receiving the request, the backend:
+        - Saves input files temporarily.
+        - Invokes the analysis tool (e.g., Clava, Kadabra) locally via a child process.
+        - Passes along:
+            - Input code
+            - JavaScript specification
+            - Selected language standard/tool as arguments or config files.
+    - Captures:
+        - Stdout/stderr logs of the tool.
+        - Generated analysis results (e.g., from output files or process output).
 
 ### 2. Result Dispatch
 
@@ -51,14 +53,15 @@ Web demo for weavers based on the LARA Framework.
            ↓
     [Run Button Pressed]
            ↓
-    [Node.js Backend API]
+     [Node.js Backend API]
            ↓
- [WebSocket Connection to Analysis Server]
+  [Tool Executed as Child Process]
            ↓
- [Analysis Tool (Clava/Kadabra/...)]
+ [Clava / Kadabra / ... Tools]
            ↓
  [Results + Logs]
            ↑
-    [Node.js Backend]
+     [Node.js Backend]
            ↑
      [Web Frontend Updated]
+```
