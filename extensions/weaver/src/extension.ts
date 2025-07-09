@@ -66,7 +66,8 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
 	box-shadow: rgba(0, 0, 0, 0.1) 0 2px 4px;
 	color: #FFFFFF;
 	cursor: pointer;
-	display: inline-block;
+	display: flex;
+	flex-direction: column;
 	font-family: Inter,-apple-system,system-ui,Roboto,"Helvetica Neue",Arial,sans-serif;
 	width: 234px;
 	height: 40px;
@@ -94,7 +95,7 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
 
 	private getDropDownStyle(): string {
 		const tool = process.env.TOOL_NAME;
-		return (tool === "clava")? `
+		return `
 		.custom-select select {
 			appearance: none;
 			-webkit-appearance: none;
@@ -165,13 +166,13 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
 		body {
 			min-height: 100vh;
 			display: grid;
-		}` : "";
+		}`;
 	}
 
 	private getDropdown(): string{
 		const tool = process.env.TOOL_NAME;
-		return (tool === "clava")? `
-		<div class="custom-select">
+		return`
+		<div class="custom-select" style="visibility: ${tool === "clava" ? "visible" : "hidden"};">
 			<select>
 				<option value="">Qual é o melhor filme de shrek?</option>
 				<option value="">shrek 1</option>
@@ -182,22 +183,22 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
 		</div>
 		<script>
 			${this.getScriptDropdown()}
-		</script>` : "";
+		</script>`;
 	}
 
 	private getHtmlForWebview(webview: vscode.Webview): string {
 
 		const tool = process.env.TOOL_NAME;
 		const img_disk = vscode.Uri.joinPath(this.extensionUri, 'media', `${tool}.png`);
-		const img_width = "168";
-		let img_height = (tool === "clava")? "46" : "38"; 
+		const img_width = "234";
+		let img_height = (tool === "clava")? "64" : "46"; 
 		const path = webview.asWebviewUri(img_disk);
 		
 		return `
 		<!DOCTYPE html>
 		<html lang="en">
 			<body>
-				<div style = "max-width:fit-content; display:flex; flex-direction: column; gap: 30px; padding: 10px">
+				<div style="height:100vh; max-width:fit-content; display:flex; flex-direction: column; gap: 30px; padding: 10px">
 
 					<div style = "display:flex; flex-direction: row; justify-content: center">
 						<img src= ${path} alt="${tool}" width=${img_width} height=${img_height}>
@@ -208,13 +209,16 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
 						${this.getWeaveButtonStyle()}
 					</style>
 
-					<button class = "weaver-button" onclick="onButtonClick()"><span class = "text">Weave Application</span></button>
-					
+					<div style = "display: flex; flex-direction: column; gap: 30px; align-items: center">
+						<button class = "weaver-button" onclick="onButtonClick()"><span class = "text">Weave Application</span></button>
+						${this.getDropdown()}
+					</div>
+
 					<script>
 						${this.getScriptWeaveButton()}	
 					</script>
 
-					${this.getDropdown()}
+					
 
 					<div style = "display: flex; flex-direction: column; gap: 10px; align-items: center; margin-top: auto; margin-bottom: 10px">
 						<img src= ${webview.asWebviewUri(vscode.Uri.joinPath(this.extensionUri, 'media', `SPeCS-logo.png`))} alt="SPeCS-logo" width=234 height=93>
