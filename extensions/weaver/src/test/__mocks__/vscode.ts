@@ -19,7 +19,8 @@ export const window = {
   showErrorMessage: jest.fn(),
   showWarningMessage: jest.fn(),
   showInformationMessage: jest.fn(),
-  showTextDocument: jest.fn()
+  showTextDocument: jest.fn(),
+  registerWebviewViewProvider: jest.fn()
 };
 
 export const commands = {
@@ -31,6 +32,14 @@ export const Uri = {
   joinPath: jest.fn((baseUri, ...paths) => ({
     fsPath: `${baseUri.fsPath}/${paths.join('/')}`,
     path: `${baseUri.path}/${paths.join('/')}`
+  })),
+  file: jest.fn((path) => ({
+    fsPath: path,
+    path: path
+  })),
+  parse: jest.fn((uri) => ({
+    fsPath: uri,
+    path: uri
   }))
 };
 

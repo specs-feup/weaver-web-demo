@@ -26,7 +26,7 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
 		webviewView.webview.html = this.getHtmlForWebview(webviewView.webview);
 
 		webviewView.webview.onDidReceiveMessage(message => {	
-		if (message.command === 'buttonClicked') {
+		if (message && message.command === 'buttonClicked') {
 			vscode.window.showInformationMessage('Button inside Weaver sidebar clicked!');
 		}
 		});
