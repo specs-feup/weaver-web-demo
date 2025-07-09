@@ -68,7 +68,12 @@ export async function activate(context: vscode.ExtensionContext) {
   const workspaceSettingsPath = path.join(parentDir, '.vscode', 'custom-workspace-settings.json');
   const userSettingsPath = path.join(parentDir, '.vscode', 'custom-user-settings.json');
   
-  await vscode.commands.executeCommand('workbench.action.closeSidebar');
+  try {
+    await vscode.commands.executeCommand('workbench.action.closeSidebar');
+  } catch (err) {
+    console.warn('Failed to close sidebar:', err);
+  }
+  
   await applySettingsFromFile(workspaceSettingsPath, vscode.ConfigurationTarget.Workspace);
   await applySettingsFromFile(userSettingsPath, vscode.ConfigurationTarget.Global);
   await apply_theme();
