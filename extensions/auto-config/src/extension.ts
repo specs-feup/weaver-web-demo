@@ -2,7 +2,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as vscode from 'vscode';
 
-async function apply_theme() {
+export async function apply_theme() {
   const tool = process.env.TOOL_NAME;
   const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
 
@@ -34,7 +34,7 @@ async function apply_theme() {
   
 }
 
-async function applySettingsFromFile(filePath: string, target: vscode.ConfigurationTarget) {
+export async function applySettingsFromFile(filePath: string, target: vscode.ConfigurationTarget) {
   if (!fs.existsSync(filePath)) {
     console.warn(`Settings file not found: ${filePath}`);
     return;
