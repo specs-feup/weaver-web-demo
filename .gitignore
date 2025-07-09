@@ -5,3 +5,4 @@ node_modules/
 extensions/*/dist/
 *.vsix
 extensions/*/out/
+extensions/*/coverage/
