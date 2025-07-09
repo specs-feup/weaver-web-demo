@@ -4,3 +4,4 @@ node_modules/
 .vscode/
 extensions/*/dist/
 *.vsix
+extensions/*/out/
