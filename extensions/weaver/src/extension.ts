@@ -60,36 +60,36 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
 	private getWeaveButtonStyle(): string {
 		const tool = process.env.TOOL_NAME;
 		const style = `
-.weaver-button {
-	background-color:  #992222;
-	border-radius: 6px;
-	box-shadow: rgba(0, 0, 0, 0.1) 0 2px 4px;
-	color: #FFFFFF;
-	cursor: pointer;
-	display: flex;
-	flex-direction: column;
-	font-family: Inter,-apple-system,system-ui,Roboto,"Helvetica Neue",Arial,sans-serif;
-	width: 234px;
-	height: 40px;
-	line-height: 40px;
-	outline: 0;
-	overflow: hidden;
-	padding: 0 20px;
-	pointer-events: auto;
-	position: relative;
-	text-align: center;
-	touch-action: manipulation;
-	user-select: none;
-	-webkit-user-select: none;
-	white-space: nowrap;
-	z-index: 9;
-	border: 0;
-	transition: box-shadow .2s;
-}
+		.weaver-button {
+			background-color:  ${tool === "clava"? "#992222" :  "#fd4"};
+			border-radius: 6px;
+			box-shadow: rgba(0, 0, 0, 0.1) 0 2px 4px;
+			color: ${tool === "clava"? "#ffffff" :  "#000000"};
+			cursor: pointer;
+			display: flex;
+			flex-direction: column;
+			font-family: Inter,-apple-system,system-ui,Roboto,"Helvetica Neue",Arial,sans-serif;
+			width: 234px;
+			height: 40px;
+			line-height: 40px;
+			outline: 0;
+			overflow: hidden;
+			padding: 0 20px;
+			pointer-events: auto;
+			position: relative;
+			text-align: center;
+			touch-action: manipulation;
+			user-select: none;
+			-webkit-user-select: none;
+			white-space: nowrap;
+			z-index: 9;
+			border: 0;
+			transition: box-shadow .2s;
+		}
 
-.weaver-button:hover {
-	box-shadow: rgba(253, 76, 0, 0.5) 0 3px 8px;
-}`;
+		.weaver-button:hover {
+			box-shadow: rgba(253, 76, 0, 0.5) 0 3px 8px;
+		}`;
 		return style;
 	}
 
