@@ -151,13 +151,6 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
 		}
 
 
-		.custom-select::after {
-			border-left: var(--size) solid transparent;
-			border-right: var(--size) solid transparent;
-			border-top: var(--size) solid black;
-			top: 55%;
-		}
-
 		* {
 			box-sizing: border-box;
 		}
