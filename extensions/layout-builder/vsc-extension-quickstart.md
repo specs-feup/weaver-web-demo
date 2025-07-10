@@ -12,8 +12,6 @@
 ## Setup
 
 * install the recommended extensions (amodio.tsl-problem-matcher, ms-vscode.extension-test-runner, and dbaeumer.vscode-eslint)
-xadsvd
-
 ## Get up and running straight away
 
 * Press `F5` to open a new window with your extension loaded.
