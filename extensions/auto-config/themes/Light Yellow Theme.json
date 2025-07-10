@@ -4,7 +4,7 @@
     "colors": {
         "activityBar.background": "#d3d3d3",
         "activityBar.foreground": "#000000", 
-        "sideBar.background": "#ffffff",
+        "sideBar.background": "#F3F3F3",
         "statusBar.background": "#440000",
         "titleBar.activeBackground": "#fff077",
         "titleBar.activeForeground": "#000000",
