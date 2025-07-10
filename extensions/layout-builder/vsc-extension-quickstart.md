@@ -11,7 +11,7 @@
 
 ## Setup
 
-* install the ed extensions (amodio.tsl-problem-matcher, ms-vscode.extension-test-runner, and dbaeumer.vscode-eslint)
+* install the recommended extensions (amodio.tsl-problem-matcher, ms-vscode.extension-test-runner, and dbaeumer.vscode-eslint)
 xadsvd
 
 ## Get up and running straight away
