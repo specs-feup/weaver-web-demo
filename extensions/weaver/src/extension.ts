@@ -46,15 +46,14 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
 
 	private getScriptDropdown(): string{
 		const tool = process.env.TOOL_NAME;
-		return (tool === "clava")?
-			`
+		return `
 				const vscode = acquireVsCodeApi();
 
 				function onDropdownChange() {
 					const select = document.getElementById('dropdown');
 					const selectedValue = select.value;
 					vscode.postMessage({ command: 'dropdownChanged', value: selectedValue });
-				}` : "";
+				}`;
 	}
 
 	private getWeaveButtonStyle(): string {
@@ -169,23 +168,6 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
 		}`;
 	}
 
-	private getDropdown(): string{
-		const tool = process.env.TOOL_NAME;
-		return`
-		<div class="custom-select" style="visibility: ${tool === "clava" ? "visible" : "hidden"};">
-			<select>
-				<option value="">Qual é o melhor filme de shrek?</option>
-				<option value="">shrek 1</option>
-				<option value="">shrek 2</option>
-				<option value="">shrek 3</option>
-				<option value="">shrek Para sempre</option>
-			</select>
-		</div>
-		<script>
-			${this.getScriptDropdown()}
-		</script>`;
-	}
-
 	private getHtmlForWebview(webview: vscode.Webview): string {
 
 		const tool = process.env.TOOL_NAME;
@@ -209,20 +191,30 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
 						${this.getWeaveButtonStyle()}
 					</style>
 
-					<div style = "display: flex; flex-direction: column; gap: 30px; align-items: center">
+					<div style = "display: flex; flex-direction: column; gap: 20px; align-items: center">
 						<button class = "weaver-button" onclick="onButtonClick()"><span class = "text">Weave Application</span></button>
-						${this.getDropdown()}
+						
+						<script>
+							${this.getScriptWeaveButton()}
+						</script>
+
+						<div class="custom-select" style="visibility: ${tool === "clava" ? "visible" : "hidden"};">
+							<select>
+								<option value="">Qual é o melhor filme de shrek?</option>
+								<option value="">shrek 1</option>
+								<option value="">shrek 2</option>
+								<option value="">shrek 3</option>
+								<option value="">shrek Para sempre</option>
+							</select>
+						</div>
+						<script>
+							${this.getScriptDropdown()}	
+						</script>
 					</div>
 
-					<script>
-						${this.getScriptWeaveButton()}	
-					</script>
-
-					
-
 					<div style = "display: flex; flex-direction: column; gap: 10px; align-items: center; margin-top: auto; margin-bottom: 10px">
-						<img src= ${webview.asWebviewUri(vscode.Uri.joinPath(this.extensionUri, 'media', `SPeCS-logo.png`))} alt="SPeCS-logo" width=234 height=93>
-						<img src= ${webview.asWebviewUri(vscode.Uri.joinPath(this.extensionUri, 'media', `feup-logo.png`))} alt="SPeCS-logo" width=234 height=81>
+						<img src= ${webview.asWebviewUri(vscode.Uri.joinPath(this.extensionUri, 'media', `SPeCS-logo.png`))} alt="SPeCS-logo" width=170 height=67>
+						<img src= ${webview.asWebviewUri(vscode.Uri.joinPath(this.extensionUri, 'media', `feup-logo.png`))} alt="FEUP-logo" width=170 height=59>
 					</div>
 				</div>
 			</body>
