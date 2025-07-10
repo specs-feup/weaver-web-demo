@@ -1,4 +1,4 @@
-const path = require('path');
+import * as path from 'path';
 
 // Mock modules
 jest.mock('child_process', () => ({
@@ -15,7 +15,7 @@ jest.mock('fs', () => ({
 
 jest.mock('unzipper', () => ({
   Extract: jest.fn().mockReturnValue({
-    promise: jest.fn().mockResolvedValue() // This needs to resolve
+    promise: jest.fn().mockResolvedValue(undefined)
   })
 }));
 
@@ -29,11 +29,15 @@ jest.mock('archiver', () => {
   return jest.fn(() => mockArchive);
 });
 
-const { exec } = require('child_process');
-const fs = require('fs');
+import { exec } from 'child_process';
+import * as fs from 'fs';
 const unzipper = require('unzipper');
 const archiver = require('archiver');
-const { runWeaver } = require('../weaver.js');
+import { runWeaver } from '../src/weaver';
+
+// Properly type the mocked exec function
+const mockExec = jest.mocked(exec);
+const mockFs = fs as jest.Mocked<typeof fs>;
 
 describe('Weaver Functions', () => {
   const testTempDir = 'test-temp';
@@ -46,25 +50,25 @@ describe('Weaver Functions', () => {
     jest.clearAllMocks();
     
     // Setup fs mocks - THIS IS THE KEY FIX
-    fs.existsSync.mockReturnValue(true);
+    mockFs.existsSync.mockReturnValue(true);
     
     // Mock the pipe chain that actually resolves
     const mockExtract = unzipper.Extract();
-    fs.createReadStream.mockReturnValue({
+    mockFs.createReadStream.mockReturnValue({
       pipe: jest.fn().mockReturnValue(mockExtract)
-    });
+    } as any);
     
-    fs.createWriteStream.mockReturnValue({
-      on: jest.fn((event, callback) => {
+    mockFs.createWriteStream.mockReturnValue({
+      on: jest.fn((event: string, callback: () => void) => {
         if (event === 'close') {
           setTimeout(() => callback(), 0); // Simulate async close
         }
       })
-    });
+    } as any);
 
     // Setup archiver mock
     const mockArchive = archiver();
-    mockArchive.on.mockImplementation((event, callback) => {
+    mockArchive.on.mockImplementation((event: string, callback: (err?: Error) => void) => {
       if (event === 'error') return mockArchive;
       if (event === 'close') {
         setTimeout(() => callback(), 0); // Simulate async close
@@ -77,7 +81,7 @@ describe('Weaver Functions', () => {
     describe('Parameter validation', () => {
       it('should throw error when tool parameter is missing', async () => {
         await expect(
-          runWeaver(null, testInputFile, testScriptFile, testStandard, testTempDir)
+          runWeaver('', testInputFile, testScriptFile, testStandard, testTempDir)
         ).rejects.toThrow('Missing required parameters: tool, inputFile, scriptFile, or standard');
       });
 
@@ -89,19 +93,19 @@ describe('Weaver Functions', () => {
 
       it('should throw error when inputFile parameter is missing', async () => {
         await expect(
-          runWeaver(testTool, null, testScriptFile, testStandard, testTempDir)
+          runWeaver(testTool, '', testScriptFile, testStandard, testTempDir)
         ).rejects.toThrow('Missing required parameters: tool, inputFile, scriptFile, or standard');
       });
 
       it('should throw error when inputFile parameter is undefined', async () => {
         await expect(
-          runWeaver(testTool, undefined, testScriptFile, testStandard, testTempDir)
+          runWeaver(testTool, '', testScriptFile, testStandard, testTempDir)
         ).rejects.toThrow('Missing required parameters: tool, inputFile, scriptFile, or standard');
       });
 
       it('should throw error when scriptFile parameter is missing', async () => {
         await expect(
-          runWeaver(testTool, testInputFile, null, testStandard, testTempDir)
+          runWeaver(testTool, testInputFile, '', testStandard, testTempDir)
         ).rejects.toThrow('Missing required parameters: tool, inputFile, scriptFile, or standard');
       });
 
@@ -113,30 +117,30 @@ describe('Weaver Functions', () => {
 
       it('should throw error when standard parameter is missing', async () => {
         await expect(
-          runWeaver(testTool, testInputFile, testScriptFile, null, testTempDir)
+          runWeaver(testTool, testInputFile, testScriptFile, '', testTempDir)
         ).rejects.toThrow('Missing required parameters: tool, inputFile, scriptFile, or standard');
       });
 
       it('should throw error when standard parameter is undefined', async () => {
         await expect(
-          runWeaver(testTool, testInputFile, testScriptFile, undefined, testTempDir)
+          runWeaver(testTool, testInputFile, testScriptFile, '', testTempDir)
         ).rejects.toThrow('Missing required parameters: tool, inputFile, scriptFile, or standard');
       });
 
       it('should throw error when multiple parameters are missing', async () => {
         await expect(
-          runWeaver(null, null, testScriptFile, testStandard, testTempDir)
+          runWeaver('', '', testScriptFile, testStandard, testTempDir)
         ).rejects.toThrow('Missing required parameters: tool, inputFile, scriptFile, or standard');
       });
 
       it('should throw error when all required parameters are missing', async () => {
         await expect(
-          runWeaver(null, null, null, null, testTempDir)
+          runWeaver('', '', '', '', testTempDir)
         ).rejects.toThrow('Missing required parameters: tool, inputFile, scriptFile, or standard');
       });
 
       it('should NOT throw error when tempDir is missing (has default value)', async () => {
-        exec.mockImplementation((command, callback) => {
+        (mockExec as any).mockImplementation((command: string, callback: any) => {
           callback(null, 'Done', '');
         });
 
@@ -147,7 +151,7 @@ describe('Weaver Functions', () => {
       });
 
       it('should work with all valid parameters including tempDir', async () => {
-        exec.mockImplementation((command, callback) => {
+        (mockExec as any).mockImplementation((command: string, callback: any) => {
           callback(null, 'Processing complete: Done', '');
         });
 
@@ -160,13 +164,13 @@ describe('Weaver Functions', () => {
         );
 
         expect(result).toContain('Done');
-        expect(exec).toHaveBeenCalledTimes(1);
+        expect(mockExec).toHaveBeenCalledTimes(1);
       });
     });
 
     it('should execute weaver command successfully and return Done log', async () => {
       // Mock successful exec with "Done" in stdout
-      exec.mockImplementation((command, callback) => {
+      (mockExec as any).mockImplementation((command: string, callback: any) => {
         expect(command).toContain('clava classic');
         expect(command).toContain(testScriptFile);
         expect(command).toContain(testStandard);
@@ -183,12 +187,12 @@ describe('Weaver Functions', () => {
 
       expect(result).toBe('stdout: Processing files... Done\n\nstderr: ');
       expect(result).toContain('Done');
-      expect(exec).toHaveBeenCalledTimes(1);
+      expect(mockExec).toHaveBeenCalledTimes(1);
     });
 
     it('should handle weaver command errors', async () => {
       // Mock exec with error
-      exec.mockImplementation((command, callback) => {
+      (mockExec as any).mockImplementation((command: string, callback: any) => {
         callback(new Error('Command failed'), '', 'error output');
       });
 
@@ -198,7 +202,7 @@ describe('Weaver Functions', () => {
     });
 
     it('should build correct command with all parameters', async () => {
-      exec.mockImplementation((command, callback) => {
+      (mockExec as any).mockImplementation((command: string, callback: any) => {
         expect(command).toBe(
           `${testTool} classic ${testScriptFile} -p ${testTempDir}/input -o ${testTempDir} -std ${testStandard}`
         );
@@ -209,7 +213,7 @@ describe('Weaver Functions', () => {
     });
 
     it('should use default temp directory when not provided', async () => {
-      exec.mockImplementation((command, callback) => {
+      (mockExec as any).mockImplementation((command: string, callback: any) => {
         expect(command).toContain('-o temp/');
         expect(command).toContain('-p temp/input');
         callback(null, 'Done', '');
@@ -219,18 +223,18 @@ describe('Weaver Functions', () => {
     });
 
     it('should call unzipFile to extract input archive', async () => {
-      exec.mockImplementation((command, callback) => {
+      (mockExec as any).mockImplementation((command: string, callback: any) => {
         callback(null, 'Done', '');
       });
 
       await runWeaver(testTool, testInputFile, testScriptFile, testStandard, testTempDir);
 
       // Verify that createReadStream was called with the input file
-      expect(fs.createReadStream).toHaveBeenCalledWith(testInputFile);
+      expect(mockFs.createReadStream).toHaveBeenCalledWith(testInputFile);
     });
 
     it('should call zipFolder to create output archive', async () => {
-      exec.mockImplementation((command, callback) => {
+      (mockExec as any).mockImplementation((command: string, callback: any) => {
         callback(null, 'Done', '');
       });
 
@@ -245,7 +249,7 @@ describe('Weaver Functions', () => {
     });
 
     it('should create correct input and output paths', async () => {
-      exec.mockImplementation((command, callback) => {
+      (mockExec as any).mockImplementation((command: string, callback: any) => {
         // Verify the command contains the correct input path
         expect(command).toContain(`-p ${testTempDir}/input`);
         // Verify the command contains the correct output directory
@@ -259,7 +263,7 @@ describe('Weaver Functions', () => {
 
   describe('createLog function (tested via runWeaver)', () => {
     it('should format stdout and stderr correctly', async () => {
-      exec.mockImplementation((command, callback) => {
+      (mockExec as any).mockImplementation((command: string, callback: any) => {
         callback(null, 'Weaving complete: Done', 'Some warnings');
       });
 
@@ -276,7 +280,7 @@ describe('Weaver Functions', () => {
     });
 
     it('should handle empty stderr', async () => {
-      exec.mockImplementation((command, callback) => {
+      (mockExec as any).mockImplementation((command: string, callback: any) => {
         callback(null, 'Processing: Done', '');
       });
 
@@ -295,23 +299,23 @@ describe('Weaver Functions', () => {
 
   describe('File operations', () => {
     it('should handle zip creation with correct paths', async () => {
-      exec.mockImplementation((command, callback) => {
+      (mockExec as any).mockImplementation((command: string, callback: any) => {
         callback(null, 'Done', '');
       });
 
       const mockWriteStream = { 
-        on: jest.fn((event, callback) => {
+        on: jest.fn((event: string, callback: () => void) => {
           if (event === 'close') {
             setTimeout(() => callback(), 0);
           }
         })
       };
-      fs.createWriteStream.mockReturnValue(mockWriteStream);
+      mockFs.createWriteStream.mockReturnValue(mockWriteStream as any);
 
       await runWeaver(testTool, testInputFile, testScriptFile, testStandard, testTempDir);
 
       // Verify output zip path creation
-      expect(fs.createWriteStream).toHaveBeenCalledWith(
+      expect(mockFs.createWriteStream).toHaveBeenCalledWith(
         path.join(testTempDir, 'output.zip')
       );
     });

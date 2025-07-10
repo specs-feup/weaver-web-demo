@@ -4,3 +4,5 @@ temp/
 local_test/
 test_download.sh
 test.sh
+dist/
+coverage/

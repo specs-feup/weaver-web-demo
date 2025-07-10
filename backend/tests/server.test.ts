@@ -1,14 +1,18 @@
+import * as fs from 'fs';
+import * as path from 'path';
+
 const request = require('supertest');
-const fs = require('fs');
-const path = require('path');
 
 // Mock the weaver module
-jest.mock('../weaver.js', () => ({
+jest.mock('../src/weaver', () => ({
   runWeaver: jest.fn()
 }));
 
-const { runWeaver } = require('../weaver.js');
-const app = require('../server.js');
+import { runWeaver } from '../src/weaver';
+import app from '../src/server';
+
+// Cast to jest.MockedFunction for better type safety
+const mockRunWeaver = runWeaver as jest.MockedFunction<typeof runWeaver>;
 
 describe('Server API Tests', () => {
   const tempDir = 'temp';
@@ -77,7 +81,7 @@ describe('Server API Tests', () => {
 
     it('should process files successfully and return log with Done', async () => {
       // Mock successful weaver execution
-      runWeaver.mockResolvedValue('stdout: Done\n\nstderr: ');
+      mockRunWeaver.mockResolvedValue('stdout: Done\n\nstderr: ');
 
       // Create test files
       const testZipContent = Buffer.from('test zip content');
@@ -94,12 +98,12 @@ describe('Server API Tests', () => {
       expect(response.body).toHaveProperty('outputFile');
       expect(response.body.log).toContain('Done');
       expect(response.body.outputFile).toBe('api/download/output.zip');
-      expect(runWeaver).toHaveBeenCalledTimes(1);
+      expect(mockRunWeaver).toHaveBeenCalledTimes(1);
     });
 
     it('should handle weaver errors', async () => {
       // Mock weaver failure
-      runWeaver.mockRejectedValue(new Error('An internal server error occurred. Please try again later.'));
+      mockRunWeaver.mockRejectedValue(new Error('An internal server error occurred. Please try again later.'));
 
       const testZipContent = Buffer.from('test zip content');
       const testJsContent = Buffer.from('console.log("test");');
@@ -117,7 +121,7 @@ describe('Server API Tests', () => {
     });
 
     it('should accept only file parameter (no zipfile)', async () => {
-      runWeaver.mockResolvedValue('stdout: Done\n\nstderr: ');
+      mockRunWeaver.mockResolvedValue('stdout: Done\n\nstderr: ');
 
       const testJsContent = Buffer.from('console.log("test");');
 
@@ -129,16 +133,16 @@ describe('Server API Tests', () => {
 
       expect(response.body).toHaveProperty('log');
       expect(response.body.log).toContain('Done');
-      expect(runWeaver).toHaveBeenCalledWith(
-        process.env.TOOL,
-        undefined, // no zipfile
+      expect(mockRunWeaver).toHaveBeenCalledWith(
+        process.env.TOOL || '',
+        '', // no zipfile
         expect.any(String), // scriptFile path
         'c++11'
       );
     });
 
     it('should accept only zipfile parameter (no script file)', async () => {
-      runWeaver.mockResolvedValue('stdout: Done\n\nstderr: ');
+      mockRunWeaver.mockResolvedValue('stdout: Done\n\nstderr: ');
 
       const testZipContent = Buffer.from('test zip content');
 
@@ -150,16 +154,16 @@ describe('Server API Tests', () => {
 
       expect(response.body).toHaveProperty('log');
       expect(response.body.log).toContain('Done');
-      expect(runWeaver).toHaveBeenCalledWith(
-        process.env.TOOL,
+      expect(mockRunWeaver).toHaveBeenCalledWith(
+        process.env.TOOL || '',
         expect.any(String), // zipfile path
-        undefined, // no script file
+        '', // no script file
         'c++11'
       );
     });
 
     it('should use environment variable TOOL in weaver call', async () => {
-      runWeaver.mockResolvedValue('stdout: Done\n\nstderr: ');
+      mockRunWeaver.mockResolvedValue('stdout: Done\n\nstderr: ');
       
       const testJsContent = Buffer.from('console.log("test");');
 
@@ -169,9 +173,9 @@ describe('Server API Tests', () => {
         .attach('file', testJsContent, 'script.js')
         .expect(200);
 
-      expect(runWeaver).toHaveBeenCalledWith(
-        process.env.TOOL,
-        undefined,
+      expect(mockRunWeaver).toHaveBeenCalledWith(
+        process.env.TOOL || '',
+        '',
         expect.any(String),
         'c++11'
       );
@@ -180,7 +184,7 @@ describe('Server API Tests', () => {
 
   describe('Multer file handling', () => {
     it('should save uploaded files with correct extension', async () => {
-      runWeaver.mockResolvedValue('stdout: Done\n\nstderr: ');
+      mockRunWeaver.mockResolvedValue('stdout: Done\n\nstderr: ');
 
       const testJsContent = Buffer.from('console.log("test");');
 
@@ -191,7 +195,8 @@ describe('Server API Tests', () => {
         .expect(200);
 
       // Check that runWeaver was called with a path ending in .js
-      const [[, , scriptPath]] = runWeaver.mock.calls;
+      const calls = mockRunWeaver.mock.calls;
+      const [, , scriptPath] = calls[0];
       expect(scriptPath).toMatch(/\.js$/);
     });
   });

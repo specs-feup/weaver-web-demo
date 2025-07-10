@@ -2,19 +2,20 @@
 This file provides the functions needed to Weave the input files received by the backend server.
 */
 
-const fs = require('fs');
+import * as fs from 'fs';
+import { exec } from 'child_process';
+import * as path from 'path';
+
 const unzipper = require('unzipper');
-const { exec } = require('child_process');
-const path = require('path');
 const archiver = require('archiver');
 
 /**
  * Unzips a zip file to a target directory using unzipper.
- * @param {string} zipPath - Path to the zip file.
- * @param {string} targetDir - Directory to extract to.
- * @returns {Promise<void>}
+ * @param zipPath - Path to the zip file.
+ * @param targetDir - Directory to extract to.
+ * @returns Promise<void>
  */
-async function unzipFile(zipPath, targetDir) {
+async function unzipFile(zipPath: string, targetDir: string): Promise<void> {
     await fs.createReadStream(zipPath)
         .pipe(unzipper.Extract({ path: targetDir }))
         .promise();
@@ -22,17 +23,17 @@ async function unzipFile(zipPath, targetDir) {
 
 /**
  * Zips a folder to a specified output path using archiver.
- * @param {*} sourceFolder Source folder to zip
- * @param {*} outPath Output path for the zip file
- * @returns {Promise<void>}
+ * @param sourceFolder Source folder to zip
+ * @param outPath Output path for the zip file
+ * @returns Promise<void>
  */
-function zipFolder(sourceFolder, outPath) {
+function zipFolder(sourceFolder: string, outPath: string): Promise<void> {
     return new Promise((resolve, reject) => {
         const output = fs.createWriteStream(outPath);
         const archive = archiver('zip', { zlib: { level: 9 } });
 
         output.on('close', () => resolve());
-        archive.on('error', err => reject(err));
+        archive.on('error', (err: Error) => reject(err));
 
         archive.pipe(output);
         archive.directory(sourceFolder, false);
@@ -42,24 +43,30 @@ function zipFolder(sourceFolder, outPath) {
 
 /**
  * Returns the concatenated log string from stdout and stderr.
- * @param {*} stdout The standard output from the Weaver tool
- * @param {*} stderr The standard error output from the Weaver tool
- * @returns 
+ * @param stdout The standard output from the Weaver tool
+ * @param stderr The standard error output from the Weaver tool
+ * @returns The formatted log string
  */
-function createLog(stdout, stderr) {
+function createLog(stdout: string, stderr: string): string {
     return `stdout: ${stdout}\n\nstderr: ${stderr}`;
 }
 
 /**
  * 
- * @param {*} tool The Weaver tool to use (e.g., 'clava')
- * @param {*} inputFile The input file to weave, which is a zip file that will be unzipped
- * @param {*} scriptFile The javascript file to use for weaving
- * @param {*} standard The standard to use for weaving (e.g., 'c++11')
- * @param {*} tempDir The temporary directory to use for input and output files (default is 'temp/')
- * @returns {Promise<string>} A promise that resolves to the log string from the Weaver tool
+ * @param tool The Weaver tool to use (e.g., 'clava')
+ * @param inputFile The input file to weave, which is a zip file that will be unzipped
+ * @param scriptFile The javascript file to use for weaving
+ * @param standard The standard to use for weaving (e.g., 'c++11')
+ * @param tempDir The temporary directory to use for input and output files (default is 'temp/')
+ * @returns A promise that resolves to the log string from the Weaver tool
  */
-async function runWeaver(tool, inputFile, scriptFile, standard, tempDir = 'temp/') {
+async function runWeaver(
+    tool: string, 
+    inputFile: string, 
+    scriptFile: string, 
+    standard: string, 
+    tempDir: string = 'temp/'
+): Promise<string> {
 
     // Throw error if any of the required parameters are missing
     if (!tool || !inputFile || !scriptFile || !standard) {
@@ -75,7 +82,7 @@ async function runWeaver(tool, inputFile, scriptFile, standard, tempDir = 'temp/
     const command = `${tool} classic ${scriptFile} -p ${inputPath} -o ${tempDir} -std ${standard}`;
     console.log(`Running command: ${command}`);
 
-    const log = await new Promise((resolve, reject) => {
+    const log = await new Promise<string>((resolve, reject) => {
         exec(command, (error, stdout, stderr) => {
             if (error) {
                 return reject(new Error(`Weaver tool failed: ${error.message}`));
@@ -93,6 +100,6 @@ async function runWeaver(tool, inputFile, scriptFile, standard, tempDir = 'temp/
     return log;
 }
 
-module.exports = {
+export {
     runWeaver
 };
