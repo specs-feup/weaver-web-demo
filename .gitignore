@@ -1,7 +1,7 @@
 .cache/
 .openvscode-server/
 node_modules/
-.vscode/
+.vscode*/
 extensions/*/dist/
 *.vsix
 extensions/*/out/
