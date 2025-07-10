@@ -2,7 +2,10 @@ import * as assert from 'assert';
 import * as vscode from 'vscode';
 import * as path from 'path';
 
-suite('Layout Builder Extension Test Suite', () => {
+// Increase timeout for slow extension host startup
+suite('Layout Builder Extension Test Suite', function () {
+	this.timeout(5000); // 5 seconds should be enough for the extension to activate
+
 	let testWorkspacePath: string;
 	let extension: vscode.Extension<any> | undefined;
 	

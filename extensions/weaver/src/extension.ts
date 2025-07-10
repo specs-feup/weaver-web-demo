@@ -206,8 +206,8 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
 					</div>
 
 					<div style = "display: flex; flex-direction: column; gap: 10px; align-items: center; margin-top: auto; margin-bottom: 10px">
-						<img src= ${webview.asWebviewUri(vscode.Uri.joinPath(this.extensionUri, 'media', `SPeCS-logo.png`))} alt="SPeCS-logo" width=170 height=67>
-						<img src= ${webview.asWebviewUri(vscode.Uri.joinPath(this.extensionUri, 'media', `feup-logo.png`))} alt="FEUP-logo" width=170 height=59>
+						<img src= ${webview.asWebviewUri(vscode.Uri.joinPath(this.extensionUri, 'media', `specs_logo.png`))} alt="SPECS-logo" width=170 height=67>
+						<img src= ${webview.asWebviewUri(vscode.Uri.joinPath(this.extensionUri, 'media', `feup_logo.png`))} alt="FEUP-logo" width=170 height=59>
 					</div>
 				</div>
 			</body>
