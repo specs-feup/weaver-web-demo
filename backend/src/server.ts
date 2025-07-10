@@ -1,23 +1,10 @@
 import * as fs from 'fs';
 import 'dotenv/config';
 import * as path from 'path';
+import express, { Request, Response } from 'express';
+import cors from 'cors';
+import multer from 'multer';
 import { runWeaver } from './weaver';
-
-const express = require('express');
-const cors = require('cors');
-const multer = require('multer');
-
-interface Request {
-  params: any;
-  body: any;
-  files?: MulterFiles;
-}
-
-interface Response {
-  json: (data: any) => void;
-  status: (code: number) => Response;
-  download: (path: string) => void;
-}
 
 const app = express();
 app.use(cors());
@@ -28,7 +15,7 @@ const PORT = process.env.PORT || 4000;
 const tempDir = 'temp';
 
 const storage = multer.diskStorage({
-  destination: function (req: Request, file: any, cb: (error: Error | null, destination: string) => void) {
+  destination: function (req, file, cb) {
     const uploadDir = path.join(tempDir, 'uploads');
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
@@ -36,7 +23,7 @@ const storage = multer.diskStorage({
 
     cb(null, uploadDir);
   },
-  filename: function (req: Request, file: any, cb: (error: Error | null, filename: string) => void) {
+  filename: function (req, file, cb) {
     // this attaches the correct file extension to the uploaded file
     // we do this because clava requires the script file to be .js
     const extension = path.extname(file.originalname);
@@ -60,21 +47,17 @@ app.get('/api/download/:filename', (req: Request, res: Response) => {
   const filePath = path.join(tempDir, req.params.filename);
 
   if (!fs.existsSync(filePath)) {
-    return res.status(404).json({ error: 'File not found' });
+    res.status(404).json({ error: 'File not found' });
+    return;
   }
 
   res.download(filePath);
 });
 
-interface MulterFile {
-  path: string;
-  fieldname: string;
-  originalname: string;
-}
-
+// Define proper types for multer files
 interface MulterFiles {
-  zipfile?: MulterFile[];
-  file?: MulterFile[];
+  zipfile?: Express.Multer.File[];
+  file?: Express.Multer.File[];
 }
 
 app.post(
@@ -85,14 +68,16 @@ app.post(
   ]),
   (req: Request, res: Response) => {
     const tool = process.env.TOOL;
+    const files = req.files as MulterFiles;
 
-    if (!req.files || (!req.files.zipfile && !req.files.file)) {
-      return res.status(400).json({ error: 'No file uploaded' });
+    if (!files || (!files.zipfile && !files.file)) {
+      res.status(400).json({ error: 'No file uploaded' });
+      return;
     }
 
     // Get args
-    const inputFile = req.files?.zipfile?.[0];
-    const scriptFile = req.files?.file?.[0];
+    const inputFile = files?.zipfile?.[0];
+    const scriptFile = files?.file?.[0];
     const standard = req.body.standard;
 
     runWeaver(tool || '', inputFile?.path || '', scriptFile?.path || '', standard)
