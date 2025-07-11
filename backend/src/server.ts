@@ -53,7 +53,26 @@ app.get('/api/status', (req: Request, res: Response) => {
 });
 
 app.get('/api/download/:sessionId/:filename', (req: Request, res: Response) => {
-  const filePath = path.join(tempDir, req.params.sessionId, req.params.filename);
+  const sessionId = req.params.sessionId;
+  const filename = req.params.filename;
+
+    // Validate sessionId and filename
+  const sessionIdRegex = /^[a-zA-Z0-9_-]+$/;
+  const filenameRegex = /^[a-zA-Z0-9._-]+$/;
+  if (!sessionIdRegex.test(sessionId) || !filenameRegex.test(filename)) {
+    res.status(400).json({ error: 'Invalid sessionId or filename' });
+    return;
+  }
+
+  // Construct and resolve the file path
+  const filePath = path.resolve(tempDir, sessionId, filename);
+  const tempDirPath = path.resolve(tempDir);
+  
+  // Ensure the resolved path is within the temp directory
+  if (!filePath.startsWith(tempDirPath)) {
+    res.status(403).json({ error: 'Access denied' });
+    return;
+  }
 
   if (!fs.existsSync(filePath)) {
     res.status(404).json({ error: 'File not found' });
