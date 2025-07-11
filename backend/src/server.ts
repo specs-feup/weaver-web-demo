@@ -15,6 +15,52 @@ const PORT = process.env.PORT || 4000;
 
 const tempDir = 'temp';
 
+// Cleanup old session directories (older than 1 hour)
+const cleanupOldSessions = () => {
+  if (!fs.existsSync(tempDir)) return;
+  
+  const oneHourAgo = Date.now() - (60 * 60 * 1000); // 1 hour in milliseconds
+  
+  try {
+    const sessionDirs = fs.readdirSync(tempDir, { withFileTypes: true })
+      .filter(dirent => dirent.isDirectory())
+      .map(dirent => dirent.name);
+    
+    for (const sessionDir of sessionDirs) {
+      const sessionPath = path.join(tempDir, sessionDir);
+      const stats = fs.statSync(sessionPath);
+      
+      // Remove directories older than 1 hour
+      if (stats.mtime.getTime() < oneHourAgo) {
+        console.log(`Cleaning up old session directory: ${sessionDir}`);
+        fs.rmSync(sessionPath, { recursive: true, force: true });
+      }
+    }
+  } catch (error) {
+    console.error('Error during session cleanup:', error);
+  }
+};
+
+// Run cleanup every 30 minutes
+let cleanupInterval: NodeJS.Timeout | null = null;
+
+// Only start cleanup interval when server is running (not during tests)
+const startCleanupInterval = () => {
+  if (!cleanupInterval) {
+    cleanupInterval = setInterval(cleanupOldSessions, 30 * 60 * 1000);
+    // Run cleanup on startup
+    cleanupOldSessions();
+  }
+};
+
+// Export cleanup function for tests
+export const stopCleanupInterval = () => {
+  if (cleanupInterval) {
+    clearInterval(cleanupInterval);
+    cleanupInterval = null;
+  }
+};
+
 // This intercepts the request to /api/weave, generating a unique session ID for each request.
 // Then routes the request to the actual /api/weave endpoint.
 app.use('/api/weave', (req, res, next) => {;
@@ -45,6 +91,8 @@ const upload = multer({ storage: storage });
 if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`🚀 Backend listening at http://localhost:${PORT}`);
+    // Start cleanup interval only when server is running
+    startCleanupInterval();
   });
 }
 
@@ -130,6 +178,12 @@ app.post(
       })
       .catch((error) => {
         console.error('Weaver error:', error);
+        
+        // Clean up session directory on weaver failure
+        if (fs.existsSync(sessionTempDir)) {
+          fs.rmSync(sessionTempDir, { recursive: true, force: true });
+        }
+        
         res.status(500).json({ error: 'An internal server error occurred. Please try again later.' });
       });
   }
