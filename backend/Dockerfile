@@ -1,4 +1,3 @@
-# Use an official Node.js LTS image
 FROM node:22
 
 # Set working directory inside the container
@@ -17,11 +16,14 @@ ENV PATH="${JAVA_HOME}/bin:${PATH}"
 # Copy package.json and package-lock.json first
 COPY package*.json ./
 
-RUN npm install
+RUN npm ci
+
 RUN npm install -g @specs-feup/${TOOL}
 
 # Copy the rest of the backend code
 COPY . .
+
+RUN npm run build
 
 # Expose the backend port
 EXPOSE 4000
