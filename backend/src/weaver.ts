@@ -16,6 +16,7 @@ const archiver = require('archiver');
  * @returns Promise<void>
  */
 async function unzipFile(zipPath: string, targetDir: string): Promise<void> {
+    console.log(`Unzipping file: ${zipPath} to directory: ${targetDir}`);
     await fs.createReadStream(zipPath)
         .pipe(unzipper.Extract({ path: targetDir }))
         .promise();
@@ -29,6 +30,7 @@ async function unzipFile(zipPath: string, targetDir: string): Promise<void> {
  */
 function zipFolder(sourceFolder: string, outPath: string): Promise<void> {
     return new Promise((resolve, reject) => {
+        console.log(`Zipping folder: ${sourceFolder} to file: ${outPath}`);
         const output = fs.createWriteStream(outPath);
         const archive = archiver('zip', { zlib: { level: 9 } });
 
@@ -69,8 +71,14 @@ async function runWeaver(
 ): Promise<string> {
 
     // Throw error if any of the required parameters are missing
-    if (!tool || !inputFile || !scriptFile || !standard) {
-        throw new Error("Missing required parameters: tool, inputFile, scriptFile, or standard");
+    if (!tool) {
+        throw new Error("Missing required parameters: tool");
+    }
+    if (!inputFile) {
+        throw new Error("Missing required parameters: inputFile");
+    }
+    if (!scriptFile) {
+        throw new Error("Missing required parameters: scriptFile");
     }
 
     // Create the input and output directories
@@ -79,7 +87,12 @@ async function runWeaver(
 
     // Run command
     // The woven code will be saved in the temp/woven_code folder
-    const command = `${tool} classic ${scriptFile} -p ${inputPath} -o ${tempDir} -std ${standard}`;
+    let command = `${tool} classic ${scriptFile} -p ${inputPath} -o ${tempDir}`;
+
+    // Only clava has a standard option
+    if (tool === 'clava' && standard){
+        command = command.concat(` -std ${standard}`);
+    }
     console.log(`Running command: ${command}`);
 
     const log = await new Promise<string>((resolve, reject) => {

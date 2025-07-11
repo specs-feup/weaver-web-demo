@@ -14,9 +14,17 @@ const PORT = process.env.PORT || 4000;
 
 const tempDir = 'temp';
 
+// This intercepts the request to /api/weave, generating a unique session ID for each request.
+// Then routes the request to the actual /api/weave endpoint.
+app.use('/api/weave', (req, res, next) => {
+  (req as any).sessionId = Date.now() + '-' + Math.random().toString(36).slice(2, 11);
+  next();
+});
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const uploadDir = path.join(tempDir, 'uploads');
+    const sessionId = (req as any).sessionId;
+    const uploadDir = path.join(tempDir, sessionId, 'uploads');
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
@@ -43,8 +51,8 @@ app.get('/api/status', (req: Request, res: Response) => {
   res.json({ status: 'Backend is running!' });
 });
 
-app.get('/api/download/:filename', (req: Request, res: Response) => {
-  const filePath = path.join(tempDir, req.params.filename);
+app.get('/api/download/:sessionId/:filename', (req: Request, res: Response) => {
+  const filePath = path.join(tempDir, req.params.sessionId, req.params.filename);
 
   if (!fs.existsSync(filePath)) {
     res.status(404).json({ error: 'File not found' });
@@ -69,6 +77,7 @@ app.post(
   (req: Request, res: Response) => {
     const tool = process.env.TOOL;
     const files = req.files as MulterFiles;
+    const sessionId = (req as any).sessionId;
 
     if (!files || (!files.zipfile && !files.file)) {
       res.status(400).json({ error: 'No file uploaded' });
@@ -79,13 +88,14 @@ app.post(
     const inputFile = files?.zipfile?.[0];
     const scriptFile = files?.file?.[0];
     const standard = req.body.standard;
+    const sessionTempDir = path.join(tempDir, sessionId);
 
-    runWeaver(tool || '', inputFile?.path || '', scriptFile?.path || '', standard)
+    runWeaver(tool || '', inputFile?.path || '', scriptFile?.path || '', standard, sessionTempDir)
       .then((log) => {
         console.log('Weaver tool executed successfully');
         res.status(200).json({
           log: log,
-          outputFile: `api/download/output.zip`,
+          outputFile: `api/download/${sessionId}/output.zip`,
         });
       })
       .catch((error) => {

@@ -82,61 +82,65 @@ describe('Weaver Functions', () => {
       it('should throw error when tool parameter is missing', async () => {
         await expect(
           runWeaver('', testInputFile, testScriptFile, testStandard, testTempDir)
-        ).rejects.toThrow('Missing required parameters: tool, inputFile, scriptFile, or standard');
+        ).rejects.toThrow('Missing required parameters: tool');
       });
 
       it('should throw error when tool parameter is empty string', async () => {
         await expect(
           runWeaver('', testInputFile, testScriptFile, testStandard, testTempDir)
-        ).rejects.toThrow('Missing required parameters: tool, inputFile, scriptFile, or standard');
+        ).rejects.toThrow('Missing required parameters: tool');
       });
 
       it('should throw error when inputFile parameter is missing', async () => {
         await expect(
           runWeaver(testTool, '', testScriptFile, testStandard, testTempDir)
-        ).rejects.toThrow('Missing required parameters: tool, inputFile, scriptFile, or standard');
+        ).rejects.toThrow('Missing required parameters: inputFile');
       });
 
       it('should throw error when inputFile parameter is undefined', async () => {
         await expect(
           runWeaver(testTool, '', testScriptFile, testStandard, testTempDir)
-        ).rejects.toThrow('Missing required parameters: tool, inputFile, scriptFile, or standard');
+        ).rejects.toThrow('Missing required parameters: inputFile');
       });
 
       it('should throw error when scriptFile parameter is missing', async () => {
         await expect(
           runWeaver(testTool, testInputFile, '', testStandard, testTempDir)
-        ).rejects.toThrow('Missing required parameters: tool, inputFile, scriptFile, or standard');
+        ).rejects.toThrow('Missing required parameters: scriptFile');
       });
 
       it('should throw error when scriptFile parameter is empty string', async () => {
         await expect(
           runWeaver(testTool, testInputFile, '', testStandard, testTempDir)
-        ).rejects.toThrow('Missing required parameters: tool, inputFile, scriptFile, or standard');
+        ).rejects.toThrow('Missing required parameters: scriptFile');
       });
 
-      it('should throw error when standard parameter is missing', async () => {
+      it('should NOT throw error when standard parameter is missing (not required)', async () => {
+        (mockExec as any).mockImplementation((command: string, callback: any) => {
+          callback(null, 'Done', '');
+        });
+
+        // Standard parameter is not required, so this should work
         await expect(
           runWeaver(testTool, testInputFile, testScriptFile, '', testTempDir)
-        ).rejects.toThrow('Missing required parameters: tool, inputFile, scriptFile, or standard');
+        ).resolves.toContain('Done');
       });
 
-      it('should throw error when standard parameter is undefined', async () => {
+      it('should NOT throw error when multiple optional parameters are missing', async () => {
+        (mockExec as any).mockImplementation((command: string, callback: any) => {
+          callback(null, 'Done', '');
+        });
+
+        // Only tool, inputFile, and scriptFile are required
         await expect(
           runWeaver(testTool, testInputFile, testScriptFile, '', testTempDir)
-        ).rejects.toThrow('Missing required parameters: tool, inputFile, scriptFile, or standard');
-      });
-
-      it('should throw error when multiple parameters are missing', async () => {
-        await expect(
-          runWeaver('', '', testScriptFile, testStandard, testTempDir)
-        ).rejects.toThrow('Missing required parameters: tool, inputFile, scriptFile, or standard');
+        ).resolves.toContain('Done');
       });
 
       it('should throw error when all required parameters are missing', async () => {
         await expect(
           runWeaver('', '', '', '', testTempDir)
-        ).rejects.toThrow('Missing required parameters: tool, inputFile, scriptFile, or standard');
+        ).rejects.toThrow('Missing required parameters: tool');
       });
 
       it('should NOT throw error when tempDir is missing (has default value)', async () => {
@@ -210,6 +214,28 @@ describe('Weaver Functions', () => {
       });
 
       await runWeaver(testTool, testInputFile, testScriptFile, testStandard, testTempDir);
+    });
+
+    it('should build correct command without standard parameter for non-clava tools', async () => {
+      (mockExec as any).mockImplementation((command: string, callback: any) => {
+        expect(command).toBe(
+          `kadabra classic ${testScriptFile} -p ${testTempDir}/input -o ${testTempDir}`
+        );
+        callback(null, 'Done', '');
+      });
+
+      await runWeaver('kadabra', testInputFile, testScriptFile, testStandard, testTempDir);
+    });
+
+    it('should build correct command without standard parameter when standard is empty', async () => {
+      (mockExec as any).mockImplementation((command: string, callback: any) => {
+        expect(command).toBe(
+          `${testTool} classic ${testScriptFile} -p ${testTempDir}/input -o ${testTempDir}`
+        );
+        callback(null, 'Done', '');
+      });
+
+      await runWeaver(testTool, testInputFile, testScriptFile, '', testTempDir);
     });
 
     it('should use default temp directory when not provided', async () => {

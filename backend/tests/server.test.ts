@@ -47,14 +47,20 @@ describe('Server API Tests', () => {
     });
   });
 
-  describe('GET /api/download/:filename', () => {
-    it('should download existing file', async () => {
-      // Create a test file
-      const testFilePath = path.join(tempDir, 'test.txt');
+  describe('GET /api/download/:sessionId/:filename', () => {
+    it('should download existing file with session ID', async () => {
+      // Create a test session directory and file
+      const sessionId = 'test-session-123';
+      const sessionDir = path.join(tempDir, sessionId);
+      const testFilePath = path.join(sessionDir, 'test.txt');
+      
+      if (!fs.existsSync(sessionDir)) {
+        fs.mkdirSync(sessionDir, { recursive: true });
+      }
       fs.writeFileSync(testFilePath, 'test content');
 
       const response = await request(app)
-        .get('/api/download/test.txt')
+        .get(`/api/download/${sessionId}/test.txt`)
         .expect(200);
 
       expect(response.headers['content-disposition']).toContain('attachment');
@@ -62,7 +68,13 @@ describe('Server API Tests', () => {
 
     it('should return 404 for non-existent file', async () => {
       await request(app)
-        .get('/api/download/nonexistent.txt')
+        .get('/api/download/nonexistent-session/nonexistent.txt')
+        .expect(404);
+    });
+
+    it('should return 404 for non-existent session', async () => {
+      await request(app)
+        .get('/api/download/nonexistent-session/test.txt')
         .expect(404);
     });
   });
@@ -97,8 +109,12 @@ describe('Server API Tests', () => {
       expect(response.body).toHaveProperty('log');
       expect(response.body).toHaveProperty('outputFile');
       expect(response.body.log).toContain('Done');
-      expect(response.body.outputFile).toBe('api/download/output.zip');
+      expect(response.body.outputFile).toMatch(/^api\/download\/[\w-]+\/output\.zip$/);
       expect(mockRunWeaver).toHaveBeenCalledTimes(1);
+      
+      // Verify the session-based temp directory was passed
+      const weaverCall = mockRunWeaver.mock.calls[0];
+      expect(weaverCall[4]).toMatch(/^temp\/[\w-]+$/); // Session temp directory
     });
 
     it('should handle weaver errors', async () => {
@@ -137,7 +153,8 @@ describe('Server API Tests', () => {
         process.env.TOOL || '',
         '', // no zipfile
         expect.any(String), // scriptFile path
-        'c++11'
+        'c++11',
+        expect.stringMatching(/^temp\/[\w-]+$/) // session temp directory
       );
     });
 
@@ -158,7 +175,8 @@ describe('Server API Tests', () => {
         process.env.TOOL || '',
         expect.any(String), // zipfile path
         '', // no script file
-        'c++11'
+        'c++11',
+        expect.stringMatching(/^temp\/[\w-]+$/) // session temp directory
       );
     });
 
@@ -177,7 +195,8 @@ describe('Server API Tests', () => {
         process.env.TOOL || '',
         '',
         expect.any(String),
-        'c++11'
+        'c++11',
+        expect.stringMatching(/^temp\/[\w-]+$/) // session temp directory
       );
     });
   });
@@ -198,6 +217,49 @@ describe('Server API Tests', () => {
       const calls = mockRunWeaver.mock.calls;
       const [, , scriptPath] = calls[0];
       expect(scriptPath).toMatch(/\.js$/);
+    });
+
+    it('should create session-specific upload directories', async () => {
+      mockRunWeaver.mockResolvedValue('stdout: Done\n\nstderr: ');
+
+      const testJsContent = Buffer.from('console.log("test");');
+
+      await request(app)
+        .post('/api/weave')
+        .field('standard', 'c++11')
+        .attach('file', testJsContent, 'script.js')
+        .expect(200);
+
+      // Check that runWeaver was called with a session-specific path
+      const calls = mockRunWeaver.mock.calls;
+      const [, , scriptPath] = calls[0];
+      expect(scriptPath).toMatch(/temp\/[\w-]+\/uploads\/file-\d+\.js$/);
+    });
+
+    it('should generate unique session IDs for concurrent requests', async () => {
+      mockRunWeaver.mockResolvedValue('stdout: Done\n\nstderr: ');
+
+      const testJsContent = Buffer.from('console.log("test");');
+
+      // Make two concurrent requests
+      const [response1, response2] = await Promise.all([
+        request(app)
+          .post('/api/weave')
+          .field('standard', 'c++11')
+          .attach('file', testJsContent, 'script.js'),
+        request(app)
+          .post('/api/weave')
+          .field('standard', 'c++11')
+          .attach('file', testJsContent, 'script.js')
+      ]);
+
+      expect(response1.status).toBe(200);
+      expect(response2.status).toBe(200);
+
+      // Check that different session IDs were generated
+      const sessionId1 = response1.body.outputFile.split('/')[2];
+      const sessionId2 = response2.body.outputFile.split('/')[2];
+      expect(sessionId1).not.toBe(sessionId2);
     });
   });
 });
