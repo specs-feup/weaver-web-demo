@@ -12,17 +12,18 @@ services:
       - DISABLE_TERMINAL=true
       - TOOL_NAME=${TOOL}
     volumes:
-      - .:/home/workspace:cached
+      - ./themes.json:/home/workspace/themes.json
       - ./custom-workspace-settings.json:/home/workspace/.vscode/custom-workspace-settings.json
       - ./custom-user-settings.json:/home/workspace/.vscode/custom-user-settings.json
-    entrypoint: [] # Clear the default entrypoint to use a custom command
-    command: ["/bin/sh", "-c", 
-      "for ext in /tmp/exts/*.vsix; do echo Installing $$ext; /home/.openvscode-server/bin/openvscode-server --install-extension $$ext; done && 
-      exec /home/.openvscode-server/bin/openvscode-server
-      --host 0.0.0.0 
-      --without-connection-token 
-      --default-workspace /home/workspace/files 
-      --default-folder /home/workspace/files 
-      --disable-workspace-trust 
-      --start-server"
+      - ./files/.vscode:/home/workspace/files/.vscode 
+    entrypoint: []
+    command: ["/bin/sh", "-c",
+      "for ext in /tmp/exts/*.vsix; do echo Installing $$ext; /home/.openvscode-server/bin/openvscode-server --install-extension $$ext; done &&
+       exec /home/.openvscode-server/bin/openvscode-server
+       --host 0.0.0.0
+       --without-connection-token
+       --default-workspace /home/workspace/files
+       --default-folder /home/workspace/files
+       --disable-workspace-trust
+       --start-server"
     ]
