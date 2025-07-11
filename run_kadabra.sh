@@ -1,3 +1,18 @@
 #!/bin/bash
 
-TOOL=kadabra docker-compose up --build
+trap_ctrl_c() {
+    echo "Caught CTRL+C. Shutting down..."
+    docker compose down
+    clear
+    exit
+}
+
+trap "trap_ctrl_c" 2
+
+export TOOL=kadabra
+docker compose up --build &
+compose_pid=$!
+
+# Wait for docker compose to finish, trap will work while waiting
+wait $compose_pid
+trap_ctrl_c
