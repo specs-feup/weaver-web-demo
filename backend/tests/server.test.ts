@@ -77,6 +77,156 @@ describe('Server API Tests', () => {
         .get('/api/download/nonexistent-session/test.txt')
         .expect(404);
     });
+
+    it('should delete session directory after successful download', async () => {
+      // Create a test session directory and file
+      const sessionId = 'test-session-456';
+      const sessionDir = path.join(tempDir, sessionId);
+      const testFilePath = path.join(sessionDir, 'test.txt');
+      
+      if (!fs.existsSync(sessionDir)) {
+        fs.mkdirSync(sessionDir, { recursive: true });
+      }
+      fs.writeFileSync(testFilePath, 'test content');
+
+      // Verify directory exists before download
+      expect(fs.existsSync(sessionDir)).toBe(true);
+
+      const response = await request(app)
+        .get(`/api/download/${sessionId}/test.txt`)
+        .expect(200);
+
+      expect(response.headers['content-disposition']).toContain('attachment');
+      
+      // Add a small delay to ensure the cleanup has time to complete
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Verify directory was deleted after successful download
+      expect(fs.existsSync(sessionDir)).toBe(false);
+    });
+
+    it('should validate sessionId with regex', async () => {
+      // Test invalid sessionId with special characters
+      await request(app)
+        .get('/api/download/invalid$session/test.txt')
+        .expect(400);
+
+      const response = await request(app)
+        .get('/api/download/invalid$session/test.txt');
+      
+      expect(response.body).toEqual({
+        error: 'Invalid sessionId or filename'
+      });
+    });
+
+    it('should validate filename with regex', async () => {
+      // Test invalid filename with special characters
+      await request(app)
+        .get('/api/download/valid-session/invalid$file.txt')
+        .expect(400);
+
+      const response = await request(app)
+        .get('/api/download/valid-session/invalid$file.txt');
+      
+      expect(response.body).toEqual({
+        error: 'Invalid sessionId or filename'
+      });
+    });
+
+    it('should prevent path traversal attacks', async () => {
+      // Test path traversal attempt using encoded dots
+      // The regex will catch most path traversal attempts
+      await request(app)
+        .get('/api/download/valid-session/..%2F..%2F..%2Fetc%2Fpasswd')
+        .expect(400); // Should fail filename regex validation
+
+      // Test another approach - filename with dots and slashes (encoded)
+      await request(app)
+        .get('/api/download/valid-session/%2E%2E%2F%2E%2E%2Fpasswd')
+        .expect(400); // Should fail filename regex validation
+    });
+
+    it('should validate path resolution security', async () => {
+      // Test that even if a filename passes regex, path resolution prevents traversal
+      // Create a test file outside the expected session directory
+      const outsideDir = path.join(tempDir, 'outside-session');
+      if (!fs.existsSync(outsideDir)) {
+        fs.mkdirSync(outsideDir, { recursive: true });
+      }
+      fs.writeFileSync(path.join(outsideDir, 'secret.txt'), 'secret content');
+
+      // Try to access file outside session directory
+      // This should fail because path resolution prevents accessing outside temp dir
+      await request(app)
+        .get('/api/download/valid-session/outside-session/secret.txt')
+        .expect(404); // File doesn't exist in the session directory
+
+      // Clean up
+      if (fs.existsSync(outsideDir)) {
+        fs.rmSync(outsideDir, { recursive: true, force: true });
+      }
+    });
+
+    it('should handle download errors gracefully', async () => {
+      // Create a test session directory
+      const sessionId = 'test-session-error';
+      const sessionDir = path.join(tempDir, sessionId);
+      
+      if (!fs.existsSync(sessionDir)) {
+        fs.mkdirSync(sessionDir, { recursive: true });
+      }
+
+      // Mock console.error to capture the error log
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      // Verify directory exists before download
+      expect(fs.existsSync(sessionDir)).toBe(true);
+
+      // Test with a non-existent file to trigger download error
+      const response = await request(app)
+        .get(`/api/download/${sessionId}/non-existent-file.txt`)
+        .expect(404);
+
+      expect(response.body).toEqual({
+        error: 'File not found'
+      });
+
+      // Verify directory still exists since download failed (404 before download callback)
+      expect(fs.existsSync(sessionDir)).toBe(true);
+
+      // Clean up manually
+      if (fs.existsSync(sessionDir)) {
+        fs.rmSync(sessionDir, { recursive: true, force: true });
+      }
+
+      consoleSpy.mockRestore();
+    });
+
+    it('should preserve session directory on validation errors', async () => {
+      // Create a test session directory
+      const sessionId = 'test-session-validation';
+      const sessionDir = path.join(tempDir, sessionId);
+      
+      if (!fs.existsSync(sessionDir)) {
+        fs.mkdirSync(sessionDir, { recursive: true });
+      }
+
+      // Verify directory exists before request
+      expect(fs.existsSync(sessionDir)).toBe(true);
+
+      // Test with invalid filename that fails validation
+      await request(app)
+        .get(`/api/download/${sessionId}/invalid$file.txt`)
+        .expect(400);
+
+      // Verify directory still exists since validation failed before download
+      expect(fs.existsSync(sessionDir)).toBe(true);
+
+      // Clean up manually
+      if (fs.existsSync(sessionDir)) {
+        fs.rmSync(sessionDir, { recursive: true, force: true });
+      }
+    });
   });
 
   describe('POST /api/weave', () => {

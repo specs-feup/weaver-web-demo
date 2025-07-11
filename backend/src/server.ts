@@ -67,7 +67,7 @@ app.get('/api/download/:sessionId/:filename', (req: Request, res: Response) => {
   // Construct and resolve the file path
   const filePath = path.resolve(tempDir, sessionId, filename);
   const tempDirPath = path.resolve(tempDir);
-  
+
   // Ensure the resolved path is within the temp directory
   if (!filePath.startsWith(tempDirPath)) {
     res.status(403).json({ error: 'Access denied' });
@@ -79,7 +79,17 @@ app.get('/api/download/:sessionId/:filename', (req: Request, res: Response) => {
     return;
   }
 
-  res.download(filePath);
+  res.download(filePath, (err) => {
+    if (!err){
+      const sessionDir = path.join(tempDir, sessionId);
+      if (fs.existsSync(sessionDir)) {
+        fs.rmSync(sessionDir, { recursive: true, force: true });
+      }
+    } 
+    else{
+      console.error(`Error during file download: ${err.message}`);
+    }
+  });
 });
 
 // Define proper types for multer files
