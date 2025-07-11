@@ -118,7 +118,7 @@ app.get('/api/download/:sessionId/:filename', (req: Request, res: Response) => {
 
   // Ensure the resolved path is within the temp directory
   const relativePath = path.relative(tempDirPath, filePath);
-  if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
+  if (relativePath.startsWith('..')) {
     res.status(403).json({ error: 'Access denied' });
     return;
   }
