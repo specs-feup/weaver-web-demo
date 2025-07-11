@@ -4,15 +4,24 @@ FROM gitpod/openvscode-server:latest
 ARG TOOL=placeholder
 
 ENV TOOL_NAME=${TOOL}
+# Switch to root temporarily for setup
+USER root
 
 # Set the working directory
 WORKDIR /home/workspace
 
-# Copy the workspace file and files directory into the container
-COPY files /home/workspace/files
-
-# Create separate directory for extensions
+# Create necessary directories
 RUN mkdir -p /tmp/exts
 
-# Copy the layout-builder extension into the temporary extensions directory
-COPY ./extensions/*/*.vsix /tmp/exts/
+# Copy files with correct ownership from the start
+COPY --chown=openvscode-server:openvscode-server files /home/workspace/files
+COPY --chown=openvscode-server:openvscode-server ./extensions/*/*.vsix /tmp/exts/
+
+# Set proper permissions
+RUN chmod -R 755 /home/workspace/files && \
+    find /home/workspace/files -type f -name "*.cpp" -exec chmod 644 {} + && \
+    find /home/workspace/files -type f -name "*.js" -exec chmod 644 {} + && \
+    find /home/workspace/files -type f -name "*.txt" -exec chmod 644 {} +
+
+# Switch back to the openvscode-server user
+USER openvscode-server

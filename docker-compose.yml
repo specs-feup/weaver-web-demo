@@ -15,7 +15,6 @@ services:
       - ./themes.json:/home/workspace/themes.json
       - ./custom-workspace-settings.json:/home/workspace/.vscode/custom-workspace-settings.json
       - ./custom-user-settings.json:/home/workspace/.vscode/custom-user-settings.json
-      - ./files/.vscode:/home/workspace/files/.vscode 
     entrypoint: []
     command: ["/bin/sh", "-c",
       "for ext in /tmp/exts/*.vsix; do echo Installing $$ext; /home/.openvscode-server/bin/openvscode-server --install-extension $$ext; done &&
