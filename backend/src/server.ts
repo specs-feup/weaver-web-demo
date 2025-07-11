@@ -5,6 +5,7 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import multer from 'multer';
 import { runWeaver } from './weaver';
+import { randomUUID} from 'crypto';
 
 const app = express();
 app.use(cors());
@@ -16,8 +17,8 @@ const tempDir = 'temp';
 
 // This intercepts the request to /api/weave, generating a unique session ID for each request.
 // Then routes the request to the actual /api/weave endpoint.
-app.use('/api/weave', (req, res, next) => {
-  (req as any).sessionId = Date.now() + '-' + Math.random().toString(36).slice(2, 11);
+app.use('/api/weave', (req, res, next) => {;
+  (req as any).sessionId = randomUUID().slice(0, 8); // Generate a short session ID
   next();
 });
 
@@ -35,7 +36,7 @@ const storage = multer.diskStorage({
     // this attaches the correct file extension to the uploaded file
     // we do this because clava requires the script file to be .js
     const extension = path.extname(file.originalname);
-    cb(null, file.fieldname + '-' + Date.now() + extension);
+    cb(null, file.fieldname + '-' + randomUUID().slice(0, 8) + extension);
   }
 });
 

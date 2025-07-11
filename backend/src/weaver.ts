@@ -16,7 +16,6 @@ const archiver = require('archiver');
  * @returns Promise<void>
  */
 async function unzipFile(zipPath: string, targetDir: string): Promise<void> {
-    console.log(`Unzipping file: ${zipPath} to directory: ${targetDir}`);
     await fs.createReadStream(zipPath)
         .pipe(unzipper.Extract({ path: targetDir }))
         .promise();
@@ -30,7 +29,6 @@ async function unzipFile(zipPath: string, targetDir: string): Promise<void> {
  */
 function zipFolder(sourceFolder: string, outPath: string): Promise<void> {
     return new Promise((resolve, reject) => {
-        console.log(`Zipping folder: ${sourceFolder} to file: ${outPath}`);
         const output = fs.createWriteStream(outPath);
         const archive = archiver('zip', { zlib: { level: 9 } });
 

@@ -233,7 +233,7 @@ describe('Server API Tests', () => {
       // Check that runWeaver was called with a session-specific path
       const calls = mockRunWeaver.mock.calls;
       const [, , scriptPath] = calls[0];
-      expect(scriptPath).toMatch(/temp\/[\w-]+\/uploads\/file-\d+\.js$/);
+      expect(scriptPath).toMatch(/temp\/[\w-]+\/uploads\/file-[\da-f]+\.js$/);
     });
 
     it('should generate unique session IDs for concurrent requests', async () => {
