@@ -6,8 +6,8 @@ import * as fs from 'fs';
 import { execFile } from 'child_process';
 import * as path from 'path';
 
-const unzipper = require('unzipper');
-const archiver = require('archiver');
+import unzipper from 'unzipper';
+import archiver from 'archiver';
 
 /**
  * Unzips a zip file to a target directory using unzipper.
