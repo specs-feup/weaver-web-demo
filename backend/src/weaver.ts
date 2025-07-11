@@ -3,7 +3,7 @@ This file provides the functions needed to Weave the input files received by the
 */
 
 import * as fs from 'fs';
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import * as path from 'path';
 
 const unzipper = require('unzipper');
@@ -83,18 +83,17 @@ async function runWeaver(
     const inputPath = path.join(tempDir, "input");
     await unzipFile(inputFile, inputPath);
 
-    // Run command
-    // The woven code will be saved in the temp/woven_code folder
-    let command = `${tool} classic ${scriptFile} -p ${inputPath} -o ${tempDir}`;
+    const args = ['classic', scriptFile, '-p', inputPath, '-o', tempDir];
 
     // Only clava has a standard option
-    if (tool === 'clava' && standard){
-        command = command.concat(` -std ${standard}`);
+    if (tool === 'clava' && standard) {
+        args.push('-std', standard);
     }
-    console.log(`Running command: ${command}`);
+
+    console.log(`Running command: ${tool} ${args.join(' ')}`);
 
     const log = await new Promise<string>((resolve, reject) => {
-        exec(command, (error, stdout, stderr) => {
+        execFile(tool, args, (error: any, stdout: any, stderr: any) => {
             if (error) {
                 return reject(new Error(`Weaver tool failed: ${error.message}`));
             }

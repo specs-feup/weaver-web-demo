@@ -63,7 +63,7 @@ export const stopCleanupInterval = () => {
 
 // This intercepts the request to /api/weave, generating a unique session ID for each request.
 // Then routes the request to the actual /api/weave endpoint.
-app.use('/api/weave', (req, res, next) => {;
+app.use('/api/weave', (req, res, next) => {
   (req as any).sessionId = randomUUID().slice(0, 8); // Generate a short session ID
   next();
 });
