@@ -1,7 +1,28 @@
 services:
-  openvscode:
+  backend:
     build:
-      context: .
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        TOOL: ${TOOL}
+    environment:
+      - TOOL=${TOOL}
+      - PORT=4000
+    ports:
+      - "8000:4000"
+    networks:
+      - weaver-network
+    command: ["npm", "start"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  frontend:
+    build:
+      context: ./frontend
       dockerfile: Dockerfile
       args:
         TOOL: ${TOOL}
@@ -11,10 +32,16 @@ services:
     environment:
       - DISABLE_TERMINAL=true
       - TOOL_NAME=${TOOL}
+      - BACKEND_URL=http://backend:4000
     volumes:
-      - ./themes.json:/home/workspace/themes.json
-      - ./custom-workspace-settings.json:/home/workspace/.vscode/custom-workspace-settings.json
-      - ./custom-user-settings.json:/home/workspace/.vscode/custom-user-settings.json
+      - ./frontend/themes.json:/home/workspace/themes.json
+      - ./frontend/custom-workspace-settings.json:/home/workspace/.vscode/custom-workspace-settings.json
+      - ./frontend/custom-user-settings.json:/home/workspace/.vscode/custom-user-settings.json
+    networks:
+      - weaver-network
+    depends_on:
+      backend:
+        condition: service_healthy
     entrypoint: []
     command: ["/bin/sh", "-c",
       "for ext in /tmp/exts/*.vsix; do echo Installing $$ext; /home/.openvscode-server/bin/openvscode-server --install-extension $$ext; done &&
@@ -26,3 +53,7 @@ services:
        --disable-workspace-trust
        --start-server"
     ]
+
+networks:
+  weaver-network:
+    driver: bridge

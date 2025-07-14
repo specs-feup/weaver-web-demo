@@ -1,0 +1,24 @@
+{
+    "compilerOptions": {
+        "module": "Node16",
+        "target": "ES2022",
+        "lib": [
+            "ES2022"
+        ],
+        "sourceMap": true,
+        "rootDir": ".",
+        "strict": true,
+        "skipLibCheck": true,
+        "isolatedModules": true,
+        "types": ["mocha", "node", "vscode"]  // ← Removed comma
+        /* Additional Checks */
+        // "noImplicitReturns": true,
+        // "noFallthroughCasesInSwitch": true,
+        // "noUnusedParameters": true,
+    },
+    "exclude": [
+        "node_modules",
+        ".vscode-test",
+        "webviews"
+    ]
+}

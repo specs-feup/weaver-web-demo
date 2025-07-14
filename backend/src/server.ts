@@ -96,8 +96,8 @@ if (require.main === module) {
   });
 }
 
-app.get('/api/status', (req: Request, res: Response) => {
-  res.json({ status: 'Backend is running!' });
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'healthy' });
 });
 
 app.get('/api/download/:sessionId/:filename', (req: Request, res: Response) => {
