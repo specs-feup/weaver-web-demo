@@ -1,67 +1,71 @@
-# Weaver Web Demo
+# Frontend
 
-Web demo for weavers based on the LARA Framework.
+Web-based VS Code editor for the Weaver Web Demo, built on **OpenVSCode Server** with custom extensions for code weaving.
 
-## Requirements
+> [!WARNING]
+> This only supports the weaver tools available through `npm`.
 
-### 1. Web Editor Interface
+## 🎯 Overview
 
-- **Editor Layout:** 4-file grid in a 2x2 layout:
-  - **Top Left:** Input code file (user-editable)
-  - **Top Right:** JavaScript script file (user-editable)
-  - **Bottom Left:** Analysis results (read-only)
-  - **Bottom Right:** Stdout/stderr output from the analysis tool (read-only)
-  
-- **Interactivity:**
-  - Only the top two panes (input + script) should be editable.
-  - Bottom two panes should be automatically updated based on backend responses.
+Browser-based VS Code environment featuring:
+- 📁 **File explorer** with sample projects
+- 🔧 **Custom extensions** for weaver integration
+- 🎨 **Tool-specific themes** (Red for Clava, Yellow for Kadabra)
+- 🌐 **WebView interface** for file upload and weaving operations
 
-- **Toolbar:**
-  - **Run Button:** Executes the selected analysis tool.
-  - **Dropdown Menu:** Allows selection of language standard (e.g., C++14, C++17, etc.).
+## 🔧 Extensions
 
-## Backend Requirements
+### Built-in Extensions
+- **`weaver`** - Main extension with webview for file upload and weaving
+- **`layout-builder`** - Creates 2x2 grid layout for code analysis
+- **`auto-config`** - Automatically configures themes based on selected tool
 
-### 1. Server-Side Execution
+### Features
+- **Tool Detection**: Automatically detects `TOOL_NAME` environment variable
+- **Theme Switching**: Applies red theme for Clava, yellow for Kadabra
+- **WebView Integration**: Embedded UI for file upload and weaving operations
 
-- **Platform:** Node.js backend.
-- **API Endpoint:** Receives input + script files from frontend and handles analysis request.
-- **Tool Execution:**
-    - Upon receiving the request, the backend:
-        - Saves input files temporarily.
-        - Invokes the analysis tool (e.g., Clava, Kadabra) locally via a child process.
-        - Passes along:
-            - Input code
-            - JavaScript specification
-            - Selected language standard/tool as arguments or config files.
-    - Captures:
-        - Stdout/stderr logs of the tool.
-        - Generated analysis results (e.g., from output files or process output).
+## 🐋 Container Configuration
 
-### 2. Result Dispatch
+Built on `gitpod/openvscode-server:latest` with:
+- **Dynamic tool configuration** via `ARG TOOL`
+- **Extension auto-installation** from `.vsix` files
+- **Custom workspace settings** for optimal weaving experience
+- **File permissions** properly configured for sample projects
 
-- Upon receiving results from the server:
-  - Send analysis output to the **bottom left pane**.
-  - Send stdout/stderr to the **bottom right pane**.
+##  Project Structure
 
----
-
-## General Architecture
-
-```plaintext
-[User] ↔ [Web Frontend]
-           ↓
-    [Run Button Pressed]
-           ↓
-     [Node.js Backend API]
-           ↓
-  [Tool Executed as Child Process]
-           ↓
- [Clava / Kadabra / ... Tools]
-           ↓
- [Results + Logs]
-           ↑
-     [Node.js Backend]
-           ↑
-     [Web Frontend Updated]
 ```
+frontend/
+├── Dockerfile              # OpenVSCode Server container
+├── extensions/             # VS Code extensions (.vsix files)
+│   ├── weaver/            # Main weaver extension
+│   ├── layout-builder/    # 2x2 grid layout tool
+│   └── auto-config/       # Auto-configuration extension
+├── files/                 # Sample workspace files
+├── themes.json            # Tool-specific theme mappings
+├── custom-*.json          # VS Code configuration files
+└── run_*.sh              # Tool-specific launch scripts
+```
+
+## 🎨 Theming
+
+The frontend automatically applies themes based on the selected tool:
+- **Clava**: Light Red Theme
+- **Kadabra**: Light Yellow Theme
+
+Theme configuration is handled by the `auto-config` extension using the `themes.json` mapping file.
+
+## 🛠️ Development
+
+To build extensions:
+```bash
+./package_extensions.sh
+```
+
+To test extensions:
+```bash
+cd extensions/[extension-name]
+npm test
+```
+
