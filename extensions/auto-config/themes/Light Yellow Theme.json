@@ -1,0 +1,57 @@
+{
+    "name": "Light Yellow Theme",
+    "type": "light",    
+    "colors": {
+        "activityBar.background": "#d3d3d3",
+        "activityBar.foreground": "#000000", 
+        "sideBar.background": "#F3F3F3",
+        "statusBar.background": "#440000",
+        "titleBar.activeBackground": "#fff077",
+        "titleBar.activeForeground": "#000000",
+        "button.background": "#ffee88",
+        "button.foreground": "#000000",
+        "button.hoverBackground": "#ffdd55",
+        "dropdown.background": "#fff9d6",
+        "dropdown.border": "#ffeeaa",
+        "dropdown.foreground": "#665500",
+        "input.background": "#fffae6",
+        "input.border": "#ffeeaa",
+        "list.hoverBackground": "#fff3b3",
+        "tab.activeBackground": "#fff5cc",
+        "tab.inactiveBackground": "#fffbe0",
+        "tab.activeForeground": "#665500"
+    },
+    "tokenColors": [
+        {
+        "scope": ["comment"],
+        "settings": {
+            "foreground": "#999933",
+            "fontStyle": "italic"
+        }
+        },
+        {
+        "scope": ["keyword"],
+        "settings": {
+            "foreground": "#ccaa00"
+        }
+        },
+        {
+        "scope": ["string"],
+        "settings": {
+            "foreground": "#b58900"
+        }
+        },
+        {
+        "scope": ["variable"],
+        "settings": {
+            "foreground": "#665500"
+        }
+        },
+        {
+        "scope": ["function"],
+        "settings": {
+            "foreground": "#886600"
+        }
+        }
+    ]
+}

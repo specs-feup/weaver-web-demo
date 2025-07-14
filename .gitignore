@@ -1,0 +1,8 @@
+.cache/
+.openvscode-server/
+node_modules/
+.vscode*/
+extensions/*/dist/
+*.vsix
+extensions/*/out/
+extensions/*/coverage/

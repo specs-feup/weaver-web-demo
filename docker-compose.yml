@@ -1,0 +1,28 @@
+services:
+  openvscode:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        TOOL: ${TOOL}
+    container_name: openvscode-server
+    ports:
+      - "3000:3000"
+    environment:
+      - DISABLE_TERMINAL=true
+      - TOOL_NAME=${TOOL}
+    volumes:
+      - ./themes.json:/home/workspace/themes.json
+      - ./custom-workspace-settings.json:/home/workspace/.vscode/custom-workspace-settings.json
+      - ./custom-user-settings.json:/home/workspace/.vscode/custom-user-settings.json
+    entrypoint: []
+    command: ["/bin/sh", "-c",
+      "for ext in /tmp/exts/*.vsix; do echo Installing $$ext; /home/.openvscode-server/bin/openvscode-server --install-extension $$ext; done &&
+       exec /home/.openvscode-server/bin/openvscode-server
+       --host 0.0.0.0
+       --without-connection-token
+       --default-workspace /home/workspace/files
+       --default-folder /home/workspace/files
+       --disable-workspace-trust
+       --start-server"
+    ]

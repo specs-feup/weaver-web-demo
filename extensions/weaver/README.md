@@ -1,0 +1,3 @@
+# weaver README
+
+Extension that allows the user to weave the application, sending the code files written to the analysis tool such as Clava, Kadabra...
