@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
+import AdmZip from 'adm-zip';
+
 
 export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.window.registerWebviewViewProvider('e-weaver',new WeaverWebviewViewProvider(context.extensionUri)));
@@ -47,11 +49,29 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
 
         const arrayBuffer = await response.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
-        const destinationPath = path.join("/home/workspace/files/", 'download.zip');
+        
+        return this.unzipToWorkspace(buffer);
+    }
 
-        fs.writeFileSync(destinationPath, buffer);
-
-        return destinationPath;
+    private async unzipToWorkspace(file: Buffer): Promise<string> {
+        try {
+            const zip = new AdmZip(file);
+            const extractPath = "/home/workspace/files/";
+            
+            // Extract all files
+            zip.extractAllTo(extractPath, true);
+            
+            vscode.window.showInformationMessage(`Files extracted to: ${extractPath}`);
+            return extractPath;
+            
+        } catch (error) {
+            vscode.window.showErrorMessage(`Error unzipping file: ${error}`);
+        
+            const destinationPath = path.join("/home/workspace/files/", 'download.zip');
+            
+            fs.writeFileSync(destinationPath, file);
+            return destinationPath;
+        }
     }
 
     private getScriptWeaveButton(): string{
