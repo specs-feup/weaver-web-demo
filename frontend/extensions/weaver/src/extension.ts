@@ -46,9 +46,6 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
     }
 
     private async downloadFileFromAPI(url: string): Promise<void> {
-<<<<<<< HEAD
-        const response = await fetch(url);
-=======
         // Create FormData with the required files
         const formData = new FormData();
         
@@ -72,7 +69,6 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
             method: 'POST',
             body: formData
         });
->>>>>>> 8e16cf7065cbbd6aa218f1d4134fee31ac04d865
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -163,7 +159,6 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
     }
 
     private getScriptDropdown(): string{
-<<<<<<< HEAD
         const stdPath = vscode.Uri.joinPath(this.extensionUri, '..', '..', '..', 'std.txt');
         console.log('Looking for std.txt at:', stdPath.fsPath);
         if (!fs.existsSync(stdPath.fsPath)) {
@@ -191,9 +186,6 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
                 } else {
                     console.error("Select element not found");
                 }
-=======
-        return `
->>>>>>> 8e16cf7065cbbd6aa218f1d4134fee31ac04d865
                 function onDropdownChange() {
                     const select = document.getElementById('standard-select');
                     const selectedValue = select.value;
