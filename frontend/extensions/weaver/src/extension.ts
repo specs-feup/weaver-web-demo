@@ -1,13 +1,12 @@
 import * as vscode from 'vscode';
-import { join } from 'path';
 import * as path from 'path';
+import * as fs from 'fs';
 
 export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.window.registerWebviewViewProvider('e-weaver',new WeaverWebviewViewProvider(context.extensionUri)));
 }
 
 export function deactivate() {}
-
 
 class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
     constructor(private readonly extensionUri: vscode.Uri) {}
@@ -27,17 +26,42 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
 
         webviewView.webview.onDidReceiveMessage(message => {	
         if (message && message.command === 'buttonClicked') {
-            vscode.window.showInformationMessage('Button inside Weaver sidebar clicked!');
+            vscode.window.showInformationMessage(`URL is: ${message.url}`);
+            this.downloadFileFromAPI(message.url)
+                .then(filePath => {
+                    vscode.window.showInformationMessage(`File downloaded to: ${filePath}`);
+                })
+                .catch(error => {
+                    vscode.window.showErrorMessage(`Error downloading file: ${error.message}`);
+                });
         }
         });
     }
 
+    private async downloadFileFromAPI(url: string): Promise<string> {
+        const response = await fetch(url)
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const arrayBuffer = await response.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        const destinationPath = path.join("/home/workspace/files/", 'download.zip');
+
+        fs.writeFileSync(destinationPath, buffer);
+
+        return destinationPath;
+    }
+
     private getScriptWeaveButton(): string{
-        const tool = process.env.TOOL_NAME;
         const buttonScript = `
             const vscode = acquireVsCodeApi();
             function onButtonClick() {
-                vscode.postMessage({ command: 'buttonClicked' });
+                vscode.postMessage({ 
+                    command: 'buttonClicked',
+                    url: 'https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-zip-file.zip' 
+                });
             }
             window.addEventListener('message', event => { "hello" });
         `;
@@ -45,7 +69,6 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
     }
 
     private getScriptDropdown(): string{
-        const tool = process.env.TOOL_NAME;
         return `
                 const vscode = acquireVsCodeApi();
 
@@ -93,7 +116,6 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
     }
 
     private getDropDownStyle(): string {
-        const tool = process.env.TOOL_NAME;
         return `
         .custom-select select {
             appearance: none;
