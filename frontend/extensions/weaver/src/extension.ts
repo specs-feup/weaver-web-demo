@@ -10,6 +10,11 @@ export function activate(context: vscode.ExtensionContext) {
 
 export function deactivate() {}
 
+interface WeaverResponse {
+    logContent: string;     // utf-8
+    wovenCodeZip: string;   // base64 encoded zip
+}
+
 class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
     constructor(private readonly extensionUri: vscode.Uri) {}
     
@@ -40,20 +45,27 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
         });
     }
 
-    private async downloadFileFromAPI(url: string): Promise<string> {
+    private async downloadFileFromAPI(url: string): Promise<void> {
         const response = await fetch(url)
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const arrayBuffer = await response.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
+        const data = await response.json() as WeaverResponse;
+
+        // Write log content to a file
+        const logPath = path.join("/home/workspace/files/", 'log.txt');
+        fs.writeFileSync(logPath, data.logContent, 'utf8');
+
+        // Decode and extract the zip file
+        const zipBytes = atob(data.wovenCodeZip);
+        const zipBuffer = Buffer.from(zipBytes, 'binary');
         
-        return this.unzipToWorkspace(buffer);
+        this.unzipToWorkspace(zipBuffer);
     }
 
-    private async unzipToWorkspace(file: Buffer): Promise<string> {
+    private async unzipToWorkspace(file: Buffer): Promise<void> {
         try {
             const zip = new AdmZip(file);
             const extractPath = "/home/workspace/files/";
@@ -62,15 +74,12 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
             zip.extractAllTo(extractPath, true);
             
             vscode.window.showInformationMessage(`Files extracted to: ${extractPath}`);
-            return extractPath;
-            
         } catch (error) {
             vscode.window.showErrorMessage(`Error unzipping file: ${error}`);
         
             const destinationPath = path.join("/home/workspace/files/", 'download.zip');
             
             fs.writeFileSync(destinationPath, file);
-            return destinationPath;
         }
     }
 
@@ -78,9 +87,12 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
         const buttonScript = `
             const vscode = acquireVsCodeApi();
             function onButtonClick() {
+                const currentHost = window.location.hostname;
+                const apiUrl = \`http://\${currentHost}:4000/api/weave\`;
+                
                 vscode.postMessage({ 
                     command: 'buttonClicked',
-                    url: 'https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-zip-file.zip' 
+                    url: apiUrl
                 });
             }
             window.addEventListener('message', event => { "hello" });
