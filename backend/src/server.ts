@@ -16,6 +16,7 @@ const PORT = process.env.PORT || 4000;
 const tempDir = 'temp';
 
 // Cleanup old session directories (older than 1 hour)
+// This may be unnecessary, because on sucess and on failure we clean up the session directory
 const cleanupOldSessions = () => {
   if (!fs.existsSync(tempDir)) return;
   
@@ -61,12 +62,11 @@ export const stopCleanupInterval = () => {
   }
 };
 
-// This intercepts the request to /api/weave, generating a unique session ID for each request.
-// Then routes the request to the actual /api/weave endpoint.
-app.use('/api/weave', (req, res, next) => {
-  (req as any).sessionId = randomUUID().slice(0, 8); // Generate a short session ID
-  next();
-});
+// Define proper types for multer files
+interface MulterFiles {
+  zipfile?: Express.Multer.File[];
+  file?: Express.Multer.File[];
+}
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -88,6 +88,14 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+// This intercepts the request to /api/weave, generating a unique session ID for each request.
+// Then routes the request to the actual /api/weave endpoint.
+app.use('/api/weave', (req, res, next) => {
+  (req as any).sessionId = randomUUID().slice(0, 8); // Generate a short session ID
+  next();
+});
+
+
 if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`🚀 Backend listening at http://localhost:${PORT}`);
@@ -99,53 +107,6 @@ if (require.main === module) {
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'healthy' });
 });
-
-app.get('/api/download/:sessionId/:filename', (req: Request, res: Response) => {
-  const sessionId = req.params.sessionId;
-  const filename = req.params.filename;
-
-    // Validate sessionId and filename
-  const sessionIdRegex = /^[a-zA-Z0-9_-]+$/;
-  const filenameRegex = /^[a-zA-Z0-9._-]+$/;
-  if (!sessionIdRegex.test(sessionId) || !filenameRegex.test(filename)) {
-    res.status(400).json({ error: 'Invalid sessionId or filename' });
-    return;
-  }
-
-  // Construct and resolve the file path
-  const filePath = path.resolve(tempDir, sessionId, filename);
-  const tempDirPath = path.resolve(tempDir);
-
-  // Ensure the resolved path is within the temp directory
-  const relativePath = path.relative(tempDirPath, filePath);
-  if (relativePath.startsWith('..')) {
-    res.status(403).json({ error: 'Access denied' });
-    return;
-  }
-
-  if (!fs.existsSync(filePath)) {
-    res.status(404).json({ error: 'File not found' });
-    return;
-  }
-
-  res.download(filePath, (err) => {
-    if (!err){
-      const sessionDir = path.join(tempDir, sessionId);
-      if (fs.existsSync(sessionDir)) {
-        fs.rmSync(sessionDir, { recursive: true, force: true });
-      }
-    } 
-    else{
-      console.error(`Error during file download: ${err.message}`);
-    }
-  });
-});
-
-// Define proper types for multer files
-interface MulterFiles {
-  zipfile?: Express.Multer.File[];
-  file?: Express.Multer.File[];
-}
 
 app.post(
   '/api/weave',
@@ -170,12 +131,23 @@ app.post(
     const sessionTempDir = path.join(tempDir, sessionId);
 
     runWeaver(tool || '', inputFile?.path || '', scriptFile?.path || '', standard, sessionTempDir)
-      .then((log) => {
+      .then((result) => {
         console.log('Weaver tool executed successfully');
+        
+        // Read the files
+        const logContent = fs.readFileSync(result.logFile);
+        const zipContent = fs.readFileSync(result.wovenCodeZip);
+        
+        // Return JSON response with base64 encoded files
         res.status(200).json({
-          log: log,
-          outputFile: `api/download/${sessionId}/output.zip`,
+          logContent: logContent.toString('utf8'),
+          wovenCodeZip: zipContent.toString('base64')
         });
+        
+        // Clean up session directory after sending files
+        if (fs.existsSync(sessionTempDir)) {
+          fs.rmSync(sessionTempDir, { recursive: true, force: true });
+        }
       })
       .catch((error) => {
         console.error('Weaver error:', error);
