@@ -47,7 +47,7 @@ function zipFolder(sourceFolder: string, outPath: string): Promise<void> {
  * @param scriptFile The javascript file to use for weaving
  * @param standard The standard to use for weaving (e.g., 'c++11')
  * @param tempDir The temporary directory to use for input and output files (default is 'temp/')
- * @returns A promise that resolves to an object with paths to the log file and woven code zip
+ * @returns A promise that resolves to an object with log content string and path to woven code zip
  */
 async function runWeaver(
     tool: string, 
@@ -75,7 +75,7 @@ async function runWeaver(
     const logFileName = 'log.txt';
 
     // -l outputs the log into a log.txt file
-    const args = ['classic', scriptFile, '-p', inputPath, '-o', tempDir, '--log', logFileName];
+    const args = ['classic', scriptFile, '-p', inputPath, '-o', tempDir];
 
     // Only clava has a standard option
     if (tool === 'clava' && standard) {
@@ -84,8 +84,13 @@ async function runWeaver(
 
     console.log(`Running command: ${tool} ${args.join(' ')}`);
 
+    let logContent = '';
+
     await new Promise<void>((resolve, reject) => {
         execFile(tool, args, (error, stdout, stderr) => {
+            // Concatenate stdout and stderr for the log
+            logContent = stdout + stderr;
+            
             if (error) {
                 reject(new Error(`Weaver tool failed: ${error.message}\n${stderr}`));
             } else if (stderr && /error/i.test(stderr)) {
@@ -99,9 +104,9 @@ async function runWeaver(
     const outputZipPath = path.join(tempDir, `${resultFolderName}.zip`);
     await zipFolder(path.join(tempDir, resultFolderName), outputZipPath);
 
-    // Return paths to the generated files
+    // Return the log content directly and path to zip file
     return {
-        logFile: path.join(tempDir, logFileName),
+        logContent: logContent,
         wovenCodeZip: outputZipPath
     };
 }
