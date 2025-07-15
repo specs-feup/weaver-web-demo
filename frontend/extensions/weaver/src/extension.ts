@@ -46,7 +46,7 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
     }
 
     private async downloadFileFromAPI(url: string): Promise<void> {
-        const response = await fetch(url)
+        const response = await fetch(url);
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -101,11 +101,35 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
     }
 
     private getScriptDropdown(): string{
-        return `
-                const vscode = acquireVsCodeApi();
+        const stdPath = vscode.Uri.joinPath(this.extensionUri, '..', '..', '..', 'std.txt');
+        console.log('Looking for std.txt at:', stdPath.fsPath);
+        if (!fs.existsSync(stdPath.fsPath)) {
+            console.error('std.txt not found at:', stdPath.fsPath);
+            return '';
+        }
 
+        const raw = fs.readFileSync(stdPath.fsPath);
+        const standards = raw.toString()
+            .split('\n')
+            .map(line => line.trim())
+            .filter(line => line.length > 0);
+        
+        console.log('Loaded standards:', standards);
+        const standardsJson = JSON.stringify(standards);
+        return `
+                const select = document.getElementById('standard-select');
+                if (select) {
+                    ${standardsJson}.forEach( standard => {
+                        const option = document.createElement('option');
+                        option.value = standard;
+                        option.textContent = standard;
+                        select.appendChild(option);
+                    });
+                } else {
+                    console.error("Select element not found");
+                }
                 function onDropdownChange() {
-                    const select = document.getElementById('dropdown');
+                    const select = document.getElementById('standard-select');
                     const selectedValue = select.value;
                     vscode.postMessage({ command: 'dropdownChanged', value: selectedValue });
                 }`;
@@ -189,19 +213,19 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
             border-left: var(--size) solid transparent;
             border-right: var(--size) solid transparent;
             border-bottom: var(--size) solid #660000;
-            top: 40%;
+            top: 65%;
         }
 
         .custom-select::after {
             border-left: var(--size) solid transparent;
             border-right: var(--size) solid transparent;
             border-top: var(--size) solid #660000;
-            top: 55%;
+            top: 80%;
         }
 
         .custom-select {
             position: relative;
-            min-width: 230px;
+            min-width: 130px;
         }
 
 
@@ -222,7 +246,6 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
         const img_width = "234";
         let img_height = (tool === "clava")? "64" : "46"; 
         const path = webview.asWebviewUri(img_disk);
-        
         return `
         <!DOCTYPE html>
         <html lang="en">
@@ -246,16 +269,12 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
                         </script>
 
                         <div class="custom-select" style="visibility: ${tool === "clava" ? "visible" : "hidden"};">
-                            <select>
-                                <option value="">Qual é o melhor filme de shrek?</option>
-                                <option value="">shrek 1</option>
-                                <option value="">shrek 2</option>
-                                <option value="">shrek 3</option>
-                                <option value="">shrek Para sempre</option>
+                            <p>Please select a standard:</p>
+                            <select id = "standard-select">
                             </select>
                         </div>
                         <script>
-                            ${this.getScriptDropdown()}	
+                        ${this.getScriptDropdown()}
                         </script>
                     </div>
 
