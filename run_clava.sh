@@ -10,9 +10,11 @@ trap_ctrl_c() {
 trap "trap_ctrl_c" 2
 
 export TOOL=clava
-cd "frontend/"
+
+cd frontend/
 sh package_extensions.sh
-cd ".."
+cd ..
+
 docker compose up --build &
 compose_pid=$!
 

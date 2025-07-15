@@ -134,13 +134,12 @@ app.post(
       .then((result) => {
         console.log('Weaver tool executed successfully');
         
-        // Read the files
-        const logContent = fs.readFileSync(result.logFile);
+        // Read the zip file
         const zipContent = fs.readFileSync(result.wovenCodeZip);
         
-        // Return JSON response with base64 encoded files
+        // Return the log and zipfile content as base64
         res.status(200).json({
-          logContent: logContent.toString('utf8'),
+          logContent: result.logContent,
           wovenCodeZip: zipContent.toString('base64')
         });
         

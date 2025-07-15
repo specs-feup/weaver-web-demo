@@ -46,7 +46,33 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
     }
 
     private async downloadFileFromAPI(url: string): Promise<void> {
+<<<<<<< HEAD
         const response = await fetch(url);
+=======
+        // Create FormData with the required files
+        const formData = new FormData();
+        
+        // Read the input folder and create a zip
+        const inputFolderPath = "/home/workspace/files/input/";
+        const inputZipBuffer = await this.createZipFromFolder(inputFolderPath);
+        const inputBlob = new Blob([inputZipBuffer], { type: 'application/zip' });
+        formData.append('zipfile', inputBlob, 'input.zip');
+        
+        // Read the script file
+        const scriptPath = "/home/workspace/files/script.js";
+        if (fs.existsSync(scriptPath)) {
+            const scriptContent = fs.readFileSync(scriptPath);
+            const scriptBlob = new Blob([scriptContent], { type: 'application/javascript' });
+            formData.append('file', scriptBlob, 'script.js');
+        } else {
+            throw new Error('Script file not found at /home/workspace/files/script.js');
+        }
+        
+        const response = await fetch(url, {
+            method: 'POST',
+            body: formData
+        });
+>>>>>>> 8e16cf7065cbbd6aa218f1d4134fee31ac04d865
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -58,11 +84,45 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
         const logPath = path.join("/home/workspace/files/", 'log.txt');
         fs.writeFileSync(logPath, data.logContent, 'utf8');
 
-        // Decode and extract the zip file
-        const zipBytes = atob(data.wovenCodeZip);
-        const zipBuffer = Buffer.from(zipBytes, 'binary');
+        // Convert base64 zip to buffer
+        const zipBuffer = Buffer.from(data.wovenCodeZip, 'base64');
         
         this.unzipToWorkspace(zipBuffer);
+    }
+
+    private async createZipFromFolder(folderPath: string): Promise<Buffer> {
+        return new Promise((resolve, reject) => {
+            if (!fs.existsSync(folderPath)) {
+                reject(new Error(`Input folder not found: ${folderPath}`));
+                return;
+            }
+
+            const zip = new AdmZip();
+            
+            // Add all files from the input folder to the zip
+            const addFolderRecursive = (currentPath: string, zipPath: string = '') => {
+                const items = fs.readdirSync(currentPath);
+                
+                for (const item of items) {
+                    const itemPath = path.join(currentPath, item);
+                    const zipItemPath = zipPath ? path.join(zipPath, item) : item;
+                    
+                    const stat = fs.statSync(itemPath);
+                    if (stat.isDirectory()) {
+                        zip.addLocalFolder(itemPath, zipItemPath);
+                    } else {
+                        zip.addLocalFile(itemPath, zipPath, item);
+                    }
+                }
+            };
+            
+            try {
+                addFolderRecursive(folderPath);
+                resolve(zip.toBuffer());
+            } catch (error) {
+                reject(error);
+            }
+        });
     }
 
     private async unzipToWorkspace(file: Buffer): Promise<void> {
@@ -84,11 +144,13 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
     }
 
     private getScriptWeaveButton(): string{
+        const backendUrl = process.env.BACKEND_URL || 'http://localhost:4000';
+
         const buttonScript = `
             const vscode = acquireVsCodeApi();
             function onButtonClick() {
-                const currentHost = window.location.hostname;
-                const apiUrl = \`http://\${currentHost}:4000/api/weave\`;
+                // Use localhost since we're in a containerized environment
+                const apiUrl = '${backendUrl}/api/weave';
                 
                 vscode.postMessage({ 
                     command: 'buttonClicked',
@@ -101,6 +163,7 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
     }
 
     private getScriptDropdown(): string{
+<<<<<<< HEAD
         const stdPath = vscode.Uri.joinPath(this.extensionUri, '..', '..', '..', 'std.txt');
         console.log('Looking for std.txt at:', stdPath.fsPath);
         if (!fs.existsSync(stdPath.fsPath)) {
@@ -128,6 +191,9 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
                 } else {
                     console.error("Select element not found");
                 }
+=======
+        return `
+>>>>>>> 8e16cf7065cbbd6aa218f1d4134fee31ac04d865
                 function onDropdownChange() {
                     const select = document.getElementById('standard-select');
                     const selectedValue = select.value;
