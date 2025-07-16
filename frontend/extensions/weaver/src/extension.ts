@@ -17,7 +17,7 @@ interface WeaverResponse {
 
 class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
     constructor(private readonly extensionUri: vscode.Uri) {}
-    
+
     public resolveWebviewView(
         webviewView: vscode.WebviewView,
         _context: vscode.WebviewViewResolveContext,
@@ -33,15 +33,14 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
 
         webviewView.webview.onDidReceiveMessage(message => {	
         if (message && message.command === 'buttonClicked') {
-            vscode.window.showInformationMessage(`URL is: ${message.url}`);
             this.downloadFileFromAPI(message.url)
-                .then(filePath => {
-                    vscode.window.showInformationMessage(`File downloaded to: ${filePath}`);
+                .then(() => {
+                    vscode.window.showInformationMessage(`File downloaded successfully`);
                 })
                 .catch(error => {
                     vscode.window.showErrorMessage(`Error downloading file: ${error.message}`);
                 });
-        }
+            }
         });
     }
 

@@ -16,7 +16,7 @@ export async function activate(context: vscode.ExtensionContext) {
     const uris = [
         vscode.Uri.joinPath(workspaceFolder.uri, 'input/input.cpp'),
         vscode.Uri.joinPath(workspaceFolder.uri, 'script.js'),
-        vscode.Uri.joinPath(workspaceFolder.uri, 'woven_code/result.cpp'),
+        vscode.Uri.joinPath(workspaceFolder.uri, 'woven_code/input.cpp'),
         vscode.Uri.joinPath(workspaceFolder.uri, 'log.txt')
     ];
     

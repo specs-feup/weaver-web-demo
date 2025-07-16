@@ -28,7 +28,7 @@ services:
         TOOL: ${TOOL}
     container_name: openvscode-server
     ports:
-      - "3000:3000"
+      - "5000:3000"
     environment:
       - DISABLE_TERMINAL=true
       - TOOL_NAME=${TOOL}

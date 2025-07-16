@@ -35,7 +35,8 @@ function zipFolder(sourceFolder: string, outPath: string): Promise<void> {
         archive.on('error', (err: Error) => reject(err));
 
         archive.pipe(output);
-        archive.directory(sourceFolder, false);
+        // Include the folder itself in the zip with the name "woven_code"
+        archive.directory(sourceFolder, 'woven_code');
         archive.finalize();
     });
 }
@@ -102,7 +103,10 @@ async function runWeaver(
     });
 
     const outputZipPath = path.join(tempDir, `${resultFolderName}.zip`);
-    await zipFolder(path.join(tempDir, resultFolderName), outputZipPath);
+    
+    // Zip the 'input' folder inside the 'woven_code' folder, but name it 'woven_code' in the ZIP
+    const inputFolderInWovenCode = path.join(tempDir, resultFolderName, 'input');
+    await zipFolder(inputFolderInWovenCode, outputZipPath);
 
     // Return the log content directly and path to zip file
     return {
