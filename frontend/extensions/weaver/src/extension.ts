@@ -33,6 +33,8 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
 
         webviewView.webview.onDidReceiveMessage(message => {	
         if (message && message.command === 'buttonClicked') {
+            this.clearFile('/home/workspace/files/log.txt');
+            this.clearFile('/home/workspace/files/woven_code/input.cpp');
             this.downloadFileFromAPI(message.url)
                 .then(() => {
                     vscode.window.showInformationMessage(`File downloaded successfully`);
@@ -48,6 +50,17 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
             }
         });
     }
+
+    private async clearFile(filePath: string) {
+        fs.writeFile(filePath, 'Loading...', 'utf8', (err) => {
+            if (err) {
+                console.error('Error clearing file:', err);
+            } else {
+                console.log('File cleared successfully');
+            }
+        });
+    }
+        
 
     private async downloadFileFromAPI(url: string): Promise<void> {
         // Create FormData with the required files
@@ -158,12 +171,21 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
             const vscode = acquireVsCodeApi();
             function onButtonClick() {
                 // Use localhost since we're in a containerized environment
+                const button = document.getElementById('weaver-button');
+                if (button) {
+                    button.disabled = true;
+                } else {
+                    console.error("Button element not found");
+                }
                 const apiUrl = '${backendUrl}/api/weave';
                 
                 vscode.postMessage({ 
                     command: 'buttonClicked',
                     url: apiUrl
                 });
+                if (button) {
+                    button.disabled = false;
+                }
             }
             window.addEventListener('message', event => { "hello" });
         `;
