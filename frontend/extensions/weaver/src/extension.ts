@@ -33,8 +33,9 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
 
         webviewView.webview.onDidReceiveMessage(message => {	
         if (message && message.command === 'buttonClicked') {
-            this.clearFile('/home/workspace/files/log.txt');
-            this.clearFile('/home/workspace/files/woven_code/input.cpp');
+            //So the user doesnt misunderstand the previous result for the next
+            this.clearFileLoading('/home/workspace/files/log.txt');
+            this.clearFileLoading('/home/workspace/files/woven_code/input.cpp');
             this.downloadFileFromAPI(message.url)
                 .then(() => {
                     vscode.window.showInformationMessage(`File downloaded successfully`);
@@ -51,7 +52,7 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
         });
     }
 
-    private async clearFile(filePath: string) {
+    private async clearFileLoading(filePath: string) {
         fs.writeFile(filePath, 'Loading...', 'utf8', (err) => {
             if (err) {
                 console.error('Error clearing file:', err);
@@ -162,6 +163,24 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
             
             fs.writeFileSync(destinationPath, file);
         }
+    }
+
+    private getLoaderStyle(){
+        return `
+        .loader {
+        border: 6px solid #f3f3f3;
+        border-top: 6px solid #992222;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+        }
+        `;
     }
 
     private getScriptWeaveButton(): string{
@@ -344,42 +363,49 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
         <!DOCTYPE html>
         <html lang="en">
             <body>
-                <div style="height:100vh; max-width:fit-content; display:flex; flex-direction: column; gap: 30px; padding: 10px">
+                <div style = "display: flex; flex-direction: row;">
+                    <div style="height:100vh; max-width:fit-content; display:flex; flex-direction: column; gap: 30px; padding: 10px">
 
-                    <div style = "display:flex; flex-direction: row; justify-content: center">
-                        <img src= ${path} alt="${tool}" width=${img_width} height=${img_height}>
-                    </div>
-
-                    <style>
-                        ${this.getDropDownStyle()}
-                        ${this.getWeaveButtonStyle()}
-                    </style>
-
-                    <div style = "display: flex; flex-direction: column; gap: 20px; align-items: center">
-                        <button class = "weaver-button" onclick="onButtonClick()"><span class = "text">Weave Application</span></button>
-                        
-                        <script>
-                            ${this.getScriptWeaveButton()}
-                        </script>
-
-                        <div class="custom-select" style="visibility: ${tool === "clava" ? "visible" : "hidden"};">
-                            <p>Please select a standard:</p>
-                            <select id = "standard-select" onchange="onDropdownChange()">
-                            </select>
+                        <div style = "display:flex; flex-direction: row; justify-content: center">
+                            <img src= ${path} alt="${tool}" width=${img_width} height=${img_height}>
                         </div>
-                        <script>
-                        ${this.getScriptDropdown()}
-                        </script>
-                    </div>
 
-                    <div style = "display: flex; flex-direction: column; gap: 10px; align-items: center; margin-top: auto; margin-bottom: 10px">
-                        <a href="https://specs.fe.up.pt/" target="_blank">
-                            <img src= ${webview.asWebviewUri(vscode.Uri.joinPath(this.extensionUri, 'media', `specs_logo.png`))} alt="SPECS-logo" width=170 height=67>
-                        </a>
-                        <a href="https://sigarra.up.pt/feup" target="_blank">
-                            <img src= ${webview.asWebviewUri(vscode.Uri.joinPath(this.extensionUri, 'media', `feup_logo.png`))} alt="FEUP-logo" width=170 height=59>
-                        </a>
+                        <style>
+                            ${this.getDropDownStyle()}
+                            ${this.getWeaveButtonStyle()}
+                            ${this.getLoaderStyle()}
+                        </style>
+
+                        <div style = "display: flex; flex-direction: column; gap: 20px; align-items: center">
+
+                            <div style = "display: flex; flex-direction: row; gap: 10px;">
+                                <button class = "weaver-button" onclick="onButtonClick()"><span class = "text">Weave Application</span></button>  
+                            </div>
+
+                            <script>
+                                ${this.getScriptWeaveButton()}
+                            </script>
+
+                            <div class="custom-select" style="visibility: ${tool === "clava" ? "visible" : "hidden"};">
+                                <p>Please select a standard:</p>
+                                <select id = "standard-select" onchange="onDropdownChange()">
+                                </select>
+                            </div>
+                            <script>
+                            ${this.getScriptDropdown()}
+                            </script>
+                        </div>
+
+                        <div style = "display: flex; flex-direction: column; gap: 10px; align-items: center; margin-top: auto; margin-bottom: 10px">
+                            <a href="https://specs.fe.up.pt/" target="_blank">
+                                <img src= ${webview.asWebviewUri(vscode.Uri.joinPath(this.extensionUri, 'media', `specs_logo.png`))} alt="SPECS-logo" width=170 height=67>
+                            </a>
+                            <a href="https://sigarra.up.pt/feup" target="_blank">
+                                <img src= ${webview.asWebviewUri(vscode.Uri.joinPath(this.extensionUri, 'media', `feup_logo.png`))} alt="FEUP-logo" width=170 height=59>
+                            </a>
+                        </div>
                     </div>
+                    <div class="loader" style=" display: flex; flex-direction: column; margin-top: 31vw; margin-left: 10px;"> </div> 
                 </div>
             </body>
         </html>
