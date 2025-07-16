@@ -5,7 +5,7 @@ import AdmZip from 'adm-zip';
 
 
 export function activate(context: vscode.ExtensionContext) {
-    context.subscriptions.push(vscode.window.registerWebviewViewProvider('e-weaver',new WeaverWebviewViewProvider(context.extensionUri)));
+    context.subscriptions.push(vscode.window.registerWebviewViewProvider('e-weaver',new WeaverWebviewViewProvider(context.extensionUri, context)));
 }
 
 export function deactivate() {}
@@ -16,7 +16,7 @@ interface WeaverResponse {
 }
 
 class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
-    constructor(private readonly extensionUri: vscode.Uri) {}
+    constructor(private readonly extensionUri: vscode.Uri, private readonly context: vscode.ExtensionContext) {}
 
     public resolveWebviewView(
         webviewView: vscode.WebviewView,
@@ -41,12 +41,19 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
                     vscode.window.showErrorMessage(`Error downloading file: ${error.message}`);
                 });
             }
+        if (message && message.command === 'dropdownChanged') {
+                const selectedStandard = message.value;
+                this.context.globalState.update('selectedStandard', selectedStandard.toLowerCase());
+                vscode.window.showInformationMessage(`Selected standard: ${selectedStandard.toLowerCase()}`);
+            }
         });
     }
 
     private async downloadFileFromAPI(url: string): Promise<void> {
         // Create FormData with the required files
         const formData = new FormData();
+        const selectedStandard = this.context.globalState.get('selectedStandard', 'c++17');
+        console.log('Using standard:', selectedStandard);
         
         // Read the input folder and create a zip
         const inputFolderPath = "/home/workspace/files/input/";
@@ -63,7 +70,13 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
         } else {
             throw new Error('Script file not found at /home/workspace/files/script.js');
         }
-        
+
+        formData.append('standard', selectedStandard || 'c++17'); // Default to c++17 if not set
+        console.log('FormData contents:');
+        formData.forEach((value, key) => {
+            console.log(` - ${key}: ${value}`);
+        });
+
         const response = await fetch(url, {
             method: 'POST',
             body: formData
@@ -233,7 +246,8 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
         .custom-select select {
             appearance: none;
             -webkit-appearance: none;
-            -moz-appearance: none;				
+            -moz-appearance: none;		
+            width: 230px;		
             background-color: #ffe5e5;   
             color: #660000;              
             border: 1px solid #ff9999;   
@@ -282,7 +296,7 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
 
         .custom-select {
             position: relative;
-            min-width: 130px;
+            min-width: 230px;
         }
 
 
@@ -291,6 +305,7 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
         }
 
         body {
+            min-width: 100vw;
             min-height: 100vh;
             display: grid;
         }`;
@@ -327,7 +342,7 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
 
                         <div class="custom-select" style="visibility: ${tool === "clava" ? "visible" : "hidden"};">
                             <p>Please select a standard:</p>
-                            <select id = "standard-select">
+                            <select id = "standard-select" onchange="onDropdownChange()">
                             </select>
                         </div>
                         <script>

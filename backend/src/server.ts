@@ -115,20 +115,30 @@ app.post(
     { name: 'file', maxCount: 1 },
   ]),
   (req: Request, res: Response) => {
+    console.log('========= ENDPOINT HIT =========');
+    console.log('Request received at:', new Date().toISOString());
+
     const tool = process.env.TOOL;
     const files = req.files as MulterFiles;
     const sessionId = (req as any).sessionId;
+
+    console.log('SessionId:', sessionId);
+    console.log('Tool:', tool);
+    console.log('Files:', files);
 
     if (!files || (!files.zipfile && !files.file)) {
       res.status(400).json({ error: 'No file uploaded' });
       return;
     }
-
-    // Get args
+    console.log('Received request body:', req.body);
+    console.log('Standard from request:', req.body.standard);
+    // Get args 
     const inputFile = files?.zipfile?.[0];
     const scriptFile = files?.file?.[0];
-    const standard = req.body.standard;
+    const standard = req.body.standard || 'c++17'; // Default to c++17 if not set
     const sessionTempDir = path.join(tempDir, sessionId);
+
+    console.log('Using standard:', standard);
 
     runWeaver(tool || '', inputFile?.path || '', scriptFile?.path || '', standard, sessionTempDir)
       .then((result) => {

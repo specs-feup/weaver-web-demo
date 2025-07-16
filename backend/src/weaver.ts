@@ -58,6 +58,12 @@ async function runWeaver(
     tempDir: string = 'temp/'
 ){
 
+    console.log('=== runWeaver called ===');
+    console.log('tool:', tool);
+    console.log('inputFile:', inputFile);
+    console.log('scriptFile:', scriptFile);
+    console.log('standard:', standard);
+    console.log('tempDir:', tempDir);
     // Throw error if any of the required parameters are missing
     if (!tool) {
         throw new Error("Missing required parameters: tool");
@@ -81,6 +87,7 @@ async function runWeaver(
     // Only clava has a standard option
     if (tool === 'clava' && standard) {
         args.push('-std', standard);
+        console.log('args pushed standard:', standard);
     }
 
     console.log(`Running command: ${tool} ${args.join(' ')}`);
