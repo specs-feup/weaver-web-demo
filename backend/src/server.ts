@@ -162,9 +162,9 @@ app.post(
         console.error('Weaver error:', error);
         
         // Clean up session directory on weaver failure
-        if (fs.existsSync(sessionTempDir)) {
-          fs.rmSync(sessionTempDir, { recursive: true, force: true });
-        }
+        //if (fs.existsSync(sessionTempDir)) {
+        //  fs.rmSync(sessionTempDir, { recursive: true, force: true });
+        //}
         
         res.status(500).json({ error: 'An internal server error occurred. Please try again later.' });
       });

@@ -34,8 +34,6 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
         webviewView.webview.onDidReceiveMessage(message => {	
         if (message && message.command === 'buttonClicked') {
             //So the user doesnt misunderstand the previous result for the next
-            this.clearFileLoading('/home/workspace/files/log.txt');
-            this.clearFileLoading('/home/workspace/files/woven_code/input.cpp');
             this.downloadFileFromAPI(message.url)
                 .then(() => {
                     vscode.window.showInformationMessage(`File downloaded successfully`);

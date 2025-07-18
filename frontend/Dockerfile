@@ -14,11 +14,11 @@ WORKDIR /home/workspace
 RUN mkdir -p /tmp/exts
 
 # Copy files with correct ownership from the start
-COPY --chown=openvscode-server:openvscode-server files/${TOOL} /home/workspace/files/${TOOL}
+COPY --chown=openvscode-server:openvscode-server files/${TOOL} /home/workspace/files/
 COPY --chown=openvscode-server:openvscode-server ./extensions/*/*.vsix /tmp/exts/
 
 # Set proper permissions
-RUN chmod -R 755 /home/workspace/files/${TOOL}
+RUN chmod -R 755 /home/workspace/files/
 
 # Switch back to the openvscode-server user
 USER openvscode-server
