@@ -194,7 +194,14 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
                 const button = document.getElementById('weaver-button');
                 if (button) {
                     button.disabled = true;
-                } else {
+                    console.log("Congelado")
+
+                    setTimeout(() => {
+                        button.disabled = false;
+                        console.log("Descongelado")
+                    }, 5000); 
+                }
+                else {
                     console.error("Button element not found");
                 }
                 const apiUrl = '${backendUrl}/api/weave';
@@ -203,9 +210,6 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
                     command: 'buttonClicked',
                     url: apiUrl
                 });
-                if (button) {
-                    button.disabled = false;
-                }
             }
             window.addEventListener('message', event => { "hello" });
         `;
@@ -250,7 +254,7 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
     private getWeaveButtonStyle(): string {
         const tool = process.env.TOOL_NAME;
         const style = `
-        .weaver-button {
+        #weaver-button {
             background-color:  ${tool === "clava"? "#992222" :  "#fd4"};
             border-radius: 6px;
             box-shadow: rgba(0, 0, 0, 0.1) 0 2px 4px;
@@ -277,7 +281,7 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
             transition: box-shadow .2s;
         }
 
-        .weaver-button:hover {
+        #weaver-button:hover {
             box-shadow: rgba(253, 76, 0, 0.5) 0 3px 8px;
         }`;
         return style;
@@ -385,7 +389,7 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
                         <div style = "display: flex; flex-direction: column; gap: 20px; align-items: center">
 
                             <div style = "display: flex; flex-direction: row; gap: 10px;">
-                                <button class = "weaver-button" onclick="onButtonClick()"><span class = "text">Weave Application</span></button>  
+                                <button id = "weaver-button" onclick="onButtonClick()"><span class = "text">Weave Application</span></button>  
                             </div>
 
                             <script>
