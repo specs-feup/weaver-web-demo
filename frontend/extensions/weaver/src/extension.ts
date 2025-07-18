@@ -166,10 +166,11 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
     }
 
     private getLoaderStyle(){
+        const tool = process.env.TOOL_NAME;
         return `
         .loader {
         border: 6px solid #f3f3f3;
-        border-top: 6px solid #992222;
+        border-top: 6px solid ${tool === "clava"? "#992222" : "#fd4"};
         border-radius: 50%;
         width: 30px;
         height: 30px;
@@ -371,6 +372,11 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
                         </div>
 
                         <style>
+                            .profiles-editor .sidebar-view {
+                                height:100%;
+                                width: 320px;
+                            }
+                            
                             ${this.getDropDownStyle()}
                             ${this.getWeaveButtonStyle()}
                             ${this.getLoaderStyle()}
@@ -405,10 +411,10 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
                             </a>
                         </div>
                     </div>
-                    <div class="loader" style=" display: flex; flex-direction: column; margin-top: 31vw; margin-left: 10px;"> </div> 
+                    <div class="loader" style=" display: flex; flex-direction: column; margin-top: ${tool === "clava"?"109px" : "94px"}; margin-left: 15px;"> </div> 
                 </div>
             </body>
         </html>
         `;
     }
-}                   
+}
