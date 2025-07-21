@@ -8,7 +8,7 @@
         "type" : "button" 
       },
       {
-        "name" : "standart",
+        "name" : "standard",
         "values": [
           "C89",
           "C90",

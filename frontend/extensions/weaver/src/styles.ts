@@ -19,11 +19,11 @@ export class StyleProvider {
 
     static getWeaveButtonStyle(tool: string): string {
         return `
-        #weaver-button {
-            background-color: ${tool === "clava" ? "#992222" : "#fd4"};
+        .weaver-button {
+            background-color: #992222;
             border-radius: 6px;
             box-shadow: rgba(0, 0, 0, 0.1) 0 2px 4px;
-            color: ${tool === "clava" ? "#ffffff" : "#000000"};
+            color: #ffffff;
             cursor: pointer;
             display: flex;
             flex-direction: column;
@@ -46,8 +46,18 @@ export class StyleProvider {
             transition: box-shadow .2s;
         }
 
-        #weaver-button:hover {
+        .weaver-button:hover {
             box-shadow: rgba(253, 76, 0, 0.5) 0 3px 8px;
+        }
+            
+        #weaver-clava {
+            background-color: #992222;
+            color: #ffffff;
+        }
+            
+        #weaver-kadabra {
+            background-color: #fd4;
+            color: #000000;
         }`;
     }
 

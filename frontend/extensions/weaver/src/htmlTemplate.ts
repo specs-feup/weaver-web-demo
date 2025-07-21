@@ -1,8 +1,79 @@
 import * as vscode from 'vscode';
 import { StyleProvider } from './styles';
 import { ScriptProvider } from './scripts';
+import { ListFormat } from 'typescript';
+import path from 'path';
+import * as fs from 'fs';
 
 export class HtmlTemplateProvider {
+    static button(name : string, backendUrl: string): string {
+        const button = `
+        <button id="${name}" class ="weaver-button" onclick="onButtonClick()"><span class="text">Weave Application</span></button>
+        <script>
+            ${ScriptProvider.getWeaveButtonScript(backendUrl)}
+        </script>
+        `;
+        return button;
+    }
+
+    static select(name : string, tool : string, extensionUri : vscode.Uri): string {
+        const select = `
+        <div id = "${name}" class="custom-select" style="visibility: ${tool === "clava" ? "visible" : "hidden"};">
+            <p>Please select a standard:</p>
+            <select id="standard-select" onchange="onDropdownChange()">
+            </select>
+        </div>
+        <script>
+            ${ScriptProvider.getDropdownScript(extensionUri)}
+        </script>`;
+        return select;
+    }
+
+    static assembleOptions(tool: string, backendUrl: string, extensionUri: vscode.Uri): string {
+        try {
+            const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+            if (!workspaceFolder) {
+                console.error('No workspace folder found');
+                return '';
+            }
+            
+            const parentDir = path.resolve(workspaceFolder, '..');
+            const configPath = path.join(parentDir, 'config.json');
+            
+            if (!fs.existsSync(configPath)) {
+                console.error(`Config file not found: ${configPath}`);
+                return '';
+            }
+            
+            const raw = fs.readFileSync(configPath, 'utf-8');
+            const config = JSON.parse(raw);
+            const toolConfig = config[tool ?? "clava"];
+            
+            if (!toolConfig?.options) {
+                console.error(`No options found for tool: ${tool}`);
+                return '';
+            }
+            
+            let res = '';
+            for(const option of toolConfig["options"]){
+                switch (option.type) {
+                    case 'button':
+                        res += this.button(option.name, backendUrl);
+                        break;
+                
+                    case 'select':
+                        res += this.select(option.name, tool??"clava", extensionUri);
+                        break;
+                }
+            }
+            return res;
+        } catch (error) {
+            console.error('Error in assembleOptions:', error);
+            return '';
+        }
+    }
+
+
     static generate(
         webview: vscode.Webview, 
         extensionUri: vscode.Uri, 
@@ -38,22 +109,8 @@ export class HtmlTemplateProvider {
 
                         <div style="display: flex; flex-direction: column; gap: 20px; align-items: center">
 
-                            <div style="display: flex; flex-direction: row; gap: 10px;">
-                                <button id="weaver-button" onclick="onButtonClick()"><span class="text">Weave Application</span></button>  
-                            </div>
+                            ${this.assembleOptions(tool,backendUrl,extensionUri)}
 
-                            <script>
-                                ${ScriptProvider.getWeaveButtonScript(backendUrl)}
-                            </script>
-
-                            <div class="custom-select" style="visibility: ${tool === "clava" ? "visible" : "hidden"};">
-                                <p>Please select a standard:</p>
-                                <select id="standard-select" onchange="onDropdownChange()">
-                                </select>
-                            </div>
-                            <script>
-                                ${ScriptProvider.getDropdownScript(extensionUri)}
-                            </script>
                         </div>
 
                         <div style="display: flex; flex-direction: column; gap: 10px; align-items: center; margin-top: auto; margin-bottom: 10px">
