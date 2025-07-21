@@ -44,7 +44,7 @@ suite('Layout Builder Extension Test Suite', function () {
 			const expectedFiles = [
 				'input/input.cpp',
 				'script.js',
-				'result/result.cpp',
+				'woven_code/input.cpp',
 				'log.txt'
 			];
 			
