@@ -48,18 +48,7 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
                 vscode.window.showInformationMessage(`Selected standard: ${selectedStandard.toLowerCase()}`);
             }
         });
-    }
-
-    private async clearFileLoading(filePath: string) {
-        fs.writeFile(filePath, 'Loading...', 'utf8', (err) => {
-            if (err) {
-                console.error('Error clearing file:', err);
-            } else {
-                console.log('File cleared successfully');
-            }
-        });
-    }
-        
+    }        
 
     private async downloadFileFromAPI(url: string): Promise<void> {
         // Create FormData with the required files
