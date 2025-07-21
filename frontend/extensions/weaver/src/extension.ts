@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import AdmZip from 'adm-zip';
 import { HtmlTemplateProvider } from './htmlTemplate';
+import { ConfigProvider } from './config';
 
 
 export function activate(context: vscode.ExtensionContext) {
@@ -177,9 +178,13 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
     }
 
     private getHtmlForWebview(webview: vscode.Webview): string {
-        const tool = process.env.TOOL_NAME || '';
-        const backendUrl = process.env.BACKEND_URL || 'http://localhost:4000';
+        const config = ConfigProvider.getConfig();
 
-        return HtmlTemplateProvider.generate(webview, this.extensionUri, tool, backendUrl);
+        return HtmlTemplateProvider.generate(
+            webview, 
+            this.extensionUri, 
+            config.tool, 
+            config.backendUrl
+        );
     }
 }

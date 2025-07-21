@@ -27,7 +27,6 @@ export class ScriptProvider {
                     url: apiUrl
                 });
             }
-            window.addEventListener('message', event => { "hello" });
         `;
     }
 
