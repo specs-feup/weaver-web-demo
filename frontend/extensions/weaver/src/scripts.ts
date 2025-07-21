@@ -30,22 +30,9 @@ export class ScriptProvider {
         `;
     }
 
-    static getDropdownScript(extensionUri: vscode.Uri): string {
-        const stdPath = vscode.Uri.joinPath(extensionUri, '..', '..', '..', 'std.txt');
-        console.log('Looking for std.txt at:', stdPath.fsPath);
-        if (!fs.existsSync(stdPath.fsPath)) {
-            console.error('std.txt not found at:', stdPath.fsPath);
-            return '';
-        }
+    static getDropdownScript(values : string[]): string {
 
-        const raw = fs.readFileSync(stdPath.fsPath);
-        const standards = raw.toString()
-            .split('\n')
-            .map(line => line.trim())
-            .filter(line => line.length > 0);
-        
-        console.log('Loaded standards:', standards);
-        const standardsJson = JSON.stringify(standards);
+        const standardsJson = JSON.stringify(values);
         return `
                 const select = document.getElementById('standard-select');
                 if (select) {

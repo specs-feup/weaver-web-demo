@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import { StyleProvider } from './styles';
 import { ScriptProvider } from './scripts';
-import { ListFormat } from 'typescript';
 import path from 'path';
 import * as fs from 'fs';
 
@@ -16,20 +15,53 @@ export class HtmlTemplateProvider {
         return button;
     }
 
-    static select(name : string, tool : string, extensionUri : vscode.Uri): string {
+    static select(name : string, tool : string, values: string[]): string {
         const select = `
-        <div id = "${name}" class="custom-select" style="visibility: ${tool === "clava" ? "visible" : "hidden"};">
+        <div id = "${name}" class="custom-select";">
             <p>Please select a standard:</p>
             <select id="standard-select" onchange="onDropdownChange()">
             </select>
         </div>
         <script>
-            ${ScriptProvider.getDropdownScript(extensionUri)}
+            ${ScriptProvider.getDropdownScript(values)}
         </script>`;
         return select;
     }
 
-    static assembleOptions(tool: string, backendUrl: string, extensionUri: vscode.Uri): string {
+    static assembleOptions(config : any , tool: string, backendUrl: string, extensionUri: vscode.Uri): string {
+        const toolConfig = config[tool ?? "clava"];
+        if (!toolConfig?.options) {
+            console.error(`No options found for tool: ${tool}`);
+            return '';
+        }
+        let res = '';
+        for(const option of toolConfig["options"]){
+            switch (option.type) {
+                case 'button':
+                    res += this.button(option.name, backendUrl);
+                    break;
+            
+                case 'select':
+                    res += this.select(option.name, tool??"clava", option.values);
+                    break;
+            }
+        }
+        return res;
+    }
+
+
+    static generate(
+        webview: vscode.Webview, 
+        extensionUri: vscode.Uri, 
+        tool: string,
+        backendUrl: string
+    ): string {
+        let config;
+        let img_width;
+        let img_height;
+        const img_disk = vscode.Uri.joinPath(extensionUri, 'media', `${tool}.png`);
+        const img_path = webview.asWebviewUri(img_disk);
+        
         try {
             const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
             if (!workspaceFolder) {
@@ -46,45 +78,16 @@ export class HtmlTemplateProvider {
             }
             
             const raw = fs.readFileSync(configPath, 'utf-8');
-            const config = JSON.parse(raw);
-            const toolConfig = config[tool ?? "clava"];
+            config = JSON.parse(raw);
             
-            if (!toolConfig?.options) {
-                console.error(`No options found for tool: ${tool}`);
-                return '';
-            }
-            
-            let res = '';
-            for(const option of toolConfig["options"]){
-                switch (option.type) {
-                    case 'button':
-                        res += this.button(option.name, backendUrl);
-                        break;
-                
-                    case 'select':
-                        res += this.select(option.name, tool??"clava", extensionUri);
-                        break;
-                }
-            }
-            return res;
+            img_width = config[tool?? "clava"]["image"]["img_width"];
+            img_height = config[tool?? "clava"]["image"]["img_height"];
+
         } catch (error) {
-            console.error('Error in assembleOptions:', error);
+            console.error('Error in Generate:', error);
             return '';
         }
-    }
 
-
-    static generate(
-        webview: vscode.Webview, 
-        extensionUri: vscode.Uri, 
-        tool: string,
-        backendUrl: string
-    ): string {
-        const img_disk = vscode.Uri.joinPath(extensionUri, 'media', `${tool}.png`);
-        const img_width = "234";
-        let img_height = (tool === "clava") ? "64" : "46"; 
-        const path = webview.asWebviewUri(img_disk);
-        
         return `
         <!DOCTYPE html>
         <html lang="en">
@@ -93,7 +96,7 @@ export class HtmlTemplateProvider {
                     <div style="height:100vh; max-width:fit-content; display:flex; flex-direction: column; gap: 30px; padding: 10px">
 
                         <div style="display:flex; flex-direction: row; justify-content: center">
-                            <img src=${path} alt="${tool}" width=${img_width} height=${img_height}>
+                            <img src=${img_path} alt="${tool}" width=${img_width} height=${img_height}>
                         </div>
 
                         <style>
@@ -109,7 +112,7 @@ export class HtmlTemplateProvider {
 
                         <div style="display: flex; flex-direction: column; gap: 20px; align-items: center">
 
-                            ${this.assembleOptions(tool,backendUrl,extensionUri)}
+                            ${this.assembleOptions(config, tool, backendUrl, extensionUri)}
 
                         </div>
 

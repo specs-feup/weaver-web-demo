@@ -2,6 +2,11 @@
   "clava" : {
     "theme" : "Light Red Theme",
     "fileExtension" : ".cpp",
+    "image" : {
+      "img_width" : 234,
+      "img_height" : 64,
+      "img_disk" : "placeholder não sei como faço isso..."
+    },
     "options" : [
       {
         "name" : "weaver-clava",
@@ -38,6 +43,11 @@
   "kadabra" : {
     "theme" : "Light Yeloow Theme",
     "fileExtension" : ".java",
+    "image" : {
+      "img_width" : 234,
+      "img_height" : 46,
+      "img_disk" : "placeholder não sei como faço isso..."
+    },
     "options" : [
       {
         "name" : "weaver-kadabra",
