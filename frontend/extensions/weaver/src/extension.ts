@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import AdmZip from 'adm-zip';
+import { HtmlTemplateProvider } from './htmlTemplate';
 
 
 export function activate(context: vscode.ExtensionContext) {
@@ -34,8 +35,9 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
         webviewView.webview.onDidReceiveMessage(message => {	
         if (message && message.command === 'buttonClicked') {
             //So the user doesnt misunderstand the previous result for the next
-            this.downloadFileFromAPI(message.url)
-                .then(() => {
+            this.sendServerRequest(message.url)
+                .then((data) => {
+                    this.updateWorkspaceFiles(data);
                     vscode.window.showInformationMessage(`File downloaded successfully`);
                 })
                 .catch(error => {
@@ -50,19 +52,23 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
         });
     }        
 
-    private async downloadFileFromAPI(url: string): Promise<void> {
-        // Create FormData with the required files
+    /**
+     * This function build the FormData object that will be sent to the server.
+     * @returns The FormData object that will be sent to the server
+     */
+    private async buildRequest(): Promise<FormData> {
+        // Creates a FormData object that will be sent to the server
         const formData = new FormData();
         const selectedStandard = this.context.globalState.get('selectedStandard', 'c++17');
         console.log('Using standard:', selectedStandard);
-        
-        // Read the input folder and create a zip
+
+        // Zips the input folder and appends it to the FormData
         const inputFolderPath = "/home/workspace/files/input/";
         const inputZipBuffer = await this.createZipFromFolder(inputFolderPath);
         const inputBlob = new Blob([inputZipBuffer], { type: 'application/zip' });
         formData.append('zipfile', inputBlob, 'input.zip');
-        
-        // Read the script file
+
+        // Add the script file to the FormData
         const scriptPath = "/home/workspace/files/script.js";
         if (fs.existsSync(scriptPath)) {
             const scriptContent = fs.readFileSync(scriptPath);
@@ -78,6 +84,18 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
             console.log(` - ${key}: ${value}`);
         });
 
+        return formData;
+    }
+
+    /**
+     * This function sends the request to the server and returns the response.
+     * If the request fails, it will throw an error.
+     * @param url The URL to send the request to
+     */
+    private async sendServerRequest(url: string): Promise<WeaverResponse> {
+        
+        const formData = await this.buildRequest();
+
         const response = await fetch(url, {
             method: 'POST',
             body: formData
@@ -87,8 +105,14 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data = await response.json() as WeaverResponse;
+        return await response.json() as WeaverResponse;
+    }
 
+    /**
+     * This function updates the workspace files with the response data from the server.
+     * @param data The response data from the server
+     */
+    private async updateWorkspaceFiles(data: WeaverResponse): Promise<void> {
         // Write log content to a file
         const logPath = path.join("/home/workspace/files/", 'log.txt');
         fs.writeFileSync(logPath, data.logContent, 'utf8');
@@ -152,260 +176,10 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
         }
     }
 
-    private getLoaderStyle(){
-        const tool = process.env.TOOL_NAME;
-        return `
-        .loader {
-        border: 6px solid #f3f3f3;
-        border-top: 6px solid ${tool === "clava"? "#992222" : "#fd4"};
-        border-radius: 50%;
-        width: 30px;
-        height: 30px;
-        animation: spin 2s linear infinite;
-        }
-
-        @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-        }
-        `;
-    }
-
-    private getScriptWeaveButton(): string{
+    private getHtmlForWebview(webview: vscode.Webview): string {
+        const tool = process.env.TOOL_NAME || '';
         const backendUrl = process.env.BACKEND_URL || 'http://localhost:4000';
 
-        const buttonScript = `
-            const vscode = acquireVsCodeApi();
-            function onButtonClick() {
-                // Use localhost since we're in a containerized environment
-                const button = document.getElementById('weaver-button');
-                if (button) {
-                    button.disabled = true;
-                    console.log("Congelado")
-
-                    setTimeout(() => {
-                        button.disabled = false;
-                        console.log("Descongelado")
-                    }, 5000); 
-                }
-                else {
-                    console.error("Button element not found");
-                }
-                const apiUrl = '${backendUrl}/api/weave';
-                
-                vscode.postMessage({ 
-                    command: 'buttonClicked',
-                    url: apiUrl
-                });
-            }
-            window.addEventListener('message', event => { "hello" });
-        `;
-        return buttonScript;
-    }
-
-    private getScriptDropdown(): string{
-        const stdPath = vscode.Uri.joinPath(this.extensionUri, '..', '..', '..', 'std.txt');
-        console.log('Looking for std.txt at:', stdPath.fsPath);
-        if (!fs.existsSync(stdPath.fsPath)) {
-            console.error('std.txt not found at:', stdPath.fsPath);
-            return '';
-        }
-
-        const raw = fs.readFileSync(stdPath.fsPath);
-        const standards = raw.toString()
-            .split('\n')
-            .map(line => line.trim())
-            .filter(line => line.length > 0);
-        
-        console.log('Loaded standards:', standards);
-        const standardsJson = JSON.stringify(standards);
-        return `
-                const select = document.getElementById('standard-select');
-                if (select) {
-                    ${standardsJson}.forEach( standard => {
-                        const option = document.createElement('option');
-                        option.value = standard;
-                        option.textContent = standard;
-                        select.appendChild(option);
-                    });
-                } else {
-                    console.error("Select element not found");
-                }
-                function onDropdownChange() {
-                    const select = document.getElementById('standard-select');
-                    const selectedValue = select.value;
-                    vscode.postMessage({ command: 'dropdownChanged', value: selectedValue });
-                }`;
-    }
-
-    private getWeaveButtonStyle(): string {
-        const tool = process.env.TOOL_NAME;
-        const style = `
-        #weaver-button {
-            background-color:  ${tool === "clava"? "#992222" :  "#fd4"};
-            border-radius: 6px;
-            box-shadow: rgba(0, 0, 0, 0.1) 0 2px 4px;
-            color: ${tool === "clava"? "#ffffff" :  "#000000"};
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            font-family: Inter,-apple-system,system-ui,Roboto,"Helvetica Neue",Arial,sans-serif;
-            width: 234px;
-            height: 40px;
-            line-height: 40px;
-            outline: 0;
-            overflow: hidden;
-            padding: 0 20px;
-            pointer-events: auto;
-            position: relative;
-            text-align: center;
-            touch-action: manipulation;
-            user-select: none;
-            -webkit-user-select: none;
-            white-space: nowrap;
-            z-index: 9;
-            border: 0;
-            transition: box-shadow .2s;
-        }
-
-        #weaver-button:hover {
-            box-shadow: rgba(253, 76, 0, 0.5) 0 3px 8px;
-        }`;
-        return style;
-    }
-
-    private getDropDownStyle(): string {
-        return `
-        .custom-select select {
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;		
-            width: 230px;		
-            background-color: #ffe5e5;   
-            color: #660000;              
-            border: 1px solid #ff9999;   
-            border-radius: 6px;
-            padding: 0.6em 1em;
-            font-size: 0.9rem;
-            font-family: inherit;
-            cursor: pointer;
-            transition: background-color 0.2s ease, border-color 0.2s ease;
-        }
-
-        .custom-select select:hover {
-            background-color: #ffd6d6;   
-            border-color: #ff6666;
-        }
-
-        .custom-select select:focus {
-            outline: none;
-            background-color: #ffcccc;
-            border-color: #ff3333;
-            box-shadow: 0 0 0 2px rgba(255, 51, 51, 0.2);
-        }
-
-        .custom-select::before,
-        .custom-select::after {
-            --size: 0.3rem;
-            content: "";
-            position: absolute;
-            right: 1rem;
-            pointer-events: none;
-        }
-
-        .custom-select::before {
-            border-left: var(--size) solid transparent;
-            border-right: var(--size) solid transparent;
-            border-bottom: var(--size) solid #660000;
-            top: 65%;
-        }
-
-        .custom-select::after {
-            border-left: var(--size) solid transparent;
-            border-right: var(--size) solid transparent;
-            border-top: var(--size) solid #660000;
-            top: 80%;
-        }
-
-        .custom-select {
-            position: relative;
-            min-width: 230px;
-        }
-
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            min-width: 100vw;
-            min-height: 100vh;
-            display: grid;
-        }`;
-    }
-
-    private getHtmlForWebview(webview: vscode.Webview): string {
-
-        const tool = process.env.TOOL_NAME;
-        const img_disk = vscode.Uri.joinPath(this.extensionUri, 'media', `${tool}.png`);
-        const img_width = "234";
-        let img_height = (tool === "clava")? "64" : "46"; 
-        const path = webview.asWebviewUri(img_disk);
-        return `
-        <!DOCTYPE html>
-        <html lang="en">
-            <body>
-                <div style = "display: flex; flex-direction: row;">
-                    <div style="height:100vh; max-width:fit-content; display:flex; flex-direction: column; gap: 30px; padding: 10px">
-
-                        <div style = "display:flex; flex-direction: row; justify-content: center">
-                            <img src= ${path} alt="${tool}" width=${img_width} height=${img_height}>
-                        </div>
-
-                        <style>
-                            .profiles-editor .sidebar-view {
-                                height:100%;
-                                width: 320px;
-                            }
-                            
-                            ${this.getDropDownStyle()}
-                            ${this.getWeaveButtonStyle()}
-                            ${this.getLoaderStyle()}
-                        </style>
-
-                        <div style = "display: flex; flex-direction: column; gap: 20px; align-items: center">
-
-                            <div style = "display: flex; flex-direction: row; gap: 10px;">
-                                <button id = "weaver-button" onclick="onButtonClick()"><span class = "text">Weave Application</span></button>  
-                            </div>
-
-                            <script>
-                                ${this.getScriptWeaveButton()}
-                            </script>
-
-                            <div class="custom-select" style="visibility: ${tool === "clava" ? "visible" : "hidden"};">
-                                <p>Please select a standard:</p>
-                                <select id = "standard-select" onchange="onDropdownChange()">
-                                </select>
-                            </div>
-                            <script>
-                            ${this.getScriptDropdown()}
-                            </script>
-                        </div>
-
-                        <div style = "display: flex; flex-direction: column; gap: 10px; align-items: center; margin-top: auto; margin-bottom: 10px">
-                            <a href="https://specs.fe.up.pt/" target="_blank">
-                                <img src= ${webview.asWebviewUri(vscode.Uri.joinPath(this.extensionUri, 'media', `specs_logo.png`))} alt="SPECS-logo" width=170 height=67>
-                            </a>
-                            <a href="https://sigarra.up.pt/feup" target="_blank">
-                                <img src= ${webview.asWebviewUri(vscode.Uri.joinPath(this.extensionUri, 'media', `feup_logo.png`))} alt="FEUP-logo" width=170 height=59>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="loader" style=" display: flex; flex-direction: column; margin-top: ${tool === "clava"?"109px" : "94px"}; margin-left: 15px;"> </div> 
-                </div>
-            </body>
-        </html>
-        `;
+        return HtmlTemplateProvider.generate(webview, this.extensionUri, tool, backendUrl);
     }
 }
