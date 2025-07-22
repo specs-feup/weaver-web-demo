@@ -3,11 +3,10 @@ This file provides the functions needed to Weave the input files received by the
 */
 
 import * as fs from 'fs';
-import { execFile } from 'child_process';
 import * as path from 'path';
-
 import unzipper from 'unzipper';
 import archiver from 'archiver';
+import { execFile } from 'child_process';
 
 /**
  * Unzips a zip file to a target directory using unzipper.
@@ -36,19 +35,10 @@ function zipFolder(sourceFolder: string, outPath: string): Promise<void> {
         archive.on('error', (err: Error) => reject(err));
 
         archive.pipe(output);
-        archive.directory(sourceFolder, false);
+        // Include the folder itself in the zip with the name "woven_code"
+        archive.directory(sourceFolder, 'woven_code');
         archive.finalize();
     });
-}
-
-/**
- * Returns the concatenated log string from stdout and stderr.
- * @param stdout The standard output from the Weaver tool
- * @param stderr The standard error output from the Weaver tool
- * @returns The formatted log string
- */
-function createLog(stdout: string, stderr: string): string {
-    return `stdout: ${stdout}\n\nstderr: ${stderr}`;
 }
 
 /**
@@ -58,7 +48,7 @@ function createLog(stdout: string, stderr: string): string {
  * @param scriptFile The javascript file to use for weaving
  * @param standard The standard to use for weaving (e.g., 'c++11')
  * @param tempDir The temporary directory to use for input and output files (default is 'temp/')
- * @returns A promise that resolves to the log string from the Weaver tool
+ * @returns A promise that resolves to an object with log content string and path to woven code zip
  */
 async function runWeaver(
     tool: string, 
@@ -66,8 +56,14 @@ async function runWeaver(
     scriptFile: string, 
     standard: string, 
     tempDir: string = 'temp/'
-): Promise<string> {
+){
 
+    console.log('=== runWeaver called ===');
+    console.log('tool:', tool);
+    console.log('inputFile:', inputFile);
+    console.log('scriptFile:', scriptFile);
+    console.log('standard:', standard);
+    console.log('tempDir:', tempDir);
     // Throw error if any of the required parameters are missing
     if (!tool) {
         throw new Error("Missing required parameters: tool");
@@ -82,32 +78,48 @@ async function runWeaver(
     // Create the input and output directories
     const inputPath = path.join(tempDir, "input");
     await unzipFile(inputFile, inputPath);
+    const resultFolderName = 'woven_code';
+    const logFileName = 'log.txt';
 
+    // -l outputs the log into a log.txt file
     const args = ['classic', scriptFile, '-p', inputPath, '-o', tempDir];
 
     // Only clava has a standard option
     if (tool === 'clava' && standard) {
         args.push('-std', standard);
+        console.log('args pushed standard:', standard);
     }
 
     console.log(`Running command: ${tool} ${args.join(' ')}`);
 
-    const log = await new Promise<string>((resolve, reject) => {
-        execFile(tool, args, (error: any, stdout: any, stderr: any) => {
+    let logContent = '';
+
+    await new Promise<void>((resolve, reject) => {
+        execFile(tool, args, (error, stdout, stderr) => {
+            // Concatenate stdout and stderr for the log
+            logContent = stdout + stderr;
+            
             if (error) {
-                return reject(new Error(`Weaver tool failed: ${error.message}`));
+                reject(new Error(`Weaver tool failed: ${error.message}\n${stderr}`));
+            } else if (stderr && /error/i.test(stderr)) {
+                reject(new Error(`Weaver tool stderr contains error: ${stderr}`));
+            } else {
+                resolve();
             }
-            if (stderr && stderr.includes("error")) {
-                return reject(new Error(`Weaver tool stderr contains error: ${stderr}`));
-            }
-            resolve(createLog(stdout, stderr));
         });
     });
 
-    const outputZipPath = path.join(tempDir, "output.zip");
-    await zipFolder(path.join(tempDir, 'woven_code'), outputZipPath);
+    const outputZipPath = path.join(tempDir, `${resultFolderName}.zip`);
+    
+    // Zip the 'input' folder inside the 'woven_code' folder, but name it 'woven_code' in the ZIP
+    const inputFolderInWovenCode = path.join(tempDir, resultFolderName, 'input');
+    await zipFolder(inputFolderInWovenCode, outputZipPath);
 
-    return log;
+    // Return the log content directly and path to zip file
+    return {
+        logContent: logContent,
+        wovenCodeZip: outputZipPath
+    };
 }
 
 export {

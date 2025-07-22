@@ -10,6 +10,11 @@ trap_ctrl_c() {
 trap "trap_ctrl_c" 2
 
 export TOOL=kadabra
+
+cd frontend/
+sh package_extensions.sh
+cd ..
+
 docker compose up --build &
 compose_pid=$!
 

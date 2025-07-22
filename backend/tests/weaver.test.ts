@@ -127,9 +127,8 @@ describe('Weaver Functions', () => {
         });
 
         // Standard parameter is not required, so this should work
-        await expect(
-          runWeaver(testTool, testInputFile, testScriptFile, '', testTempDir)
-        ).resolves.toContain('Done');
+        const result = await runWeaver(testTool, testInputFile, testScriptFile, '', testTempDir);
+        expect(result.logContent).toContain('Done');
       });
 
       it('should NOT throw error when multiple optional parameters are missing', async () => {
@@ -138,9 +137,8 @@ describe('Weaver Functions', () => {
         });
 
         // Only tool, inputFile, and scriptFile are required
-        await expect(
-          runWeaver(testTool, testInputFile, testScriptFile, '', testTempDir)
-        ).resolves.toContain('Done');
+        const result = await runWeaver(testTool, testInputFile, testScriptFile, '', testTempDir);
+        expect(result.logContent).toContain('Done');
       });
 
       it('should throw error when all required parameters are missing', async () => {
@@ -155,9 +153,8 @@ describe('Weaver Functions', () => {
         });
 
         // This should work because tempDir has a default value
-        await expect(
-          runWeaver(testTool, testInputFile, testScriptFile, testStandard)
-        ).resolves.toContain('Done');
+        const result = await runWeaver(testTool, testInputFile, testScriptFile, testStandard);
+        expect(result.logContent).toContain('Done');
       });
 
       it('should work with all valid parameters including tempDir', async () => {
@@ -173,12 +170,12 @@ describe('Weaver Functions', () => {
           testTempDir
         );
 
-        expect(result).toContain('Done');
+        expect(result.logContent).toContain('Done');
         expect(mockExecFile).toHaveBeenCalledTimes(1);
       });
     });
 
-    it('should execute weaver command successfully and return Done log', async () => {
+    it('should execute weaver command successfully and return object with log content', async () => {
       // Mock successful exec with "Done" in stdout
       (mockExecFile as any).mockImplementation((file: string, args: string[], callback: any) => {
         expect(file).toBe('clava');
@@ -197,8 +194,10 @@ describe('Weaver Functions', () => {
         testTempDir
       );
 
-      expect(result).toBe('stdout: Done\n\nstderr: ');
-      expect(result).toContain('Done');
+      expect(result).toHaveProperty('logContent');
+      expect(result).toHaveProperty('wovenCodeZip');
+      expect(result.logContent).toBe('Done');
+      expect(result.wovenCodeZip).toContain('woven_code.zip');
       expect(mockExecFile).toHaveBeenCalledTimes(1);
     });
 
@@ -277,7 +276,7 @@ describe('Weaver Functions', () => {
 
       // Verify that archiver was called
       expect(archiver).toHaveBeenCalledWith('zip', { zlib: { level: 9 } });
-      expect(mockArchive.directory).toHaveBeenCalledWith(`${testTempDir}/woven_code`, false);
+      expect(mockArchive.directory).toHaveBeenCalledWith(`${testTempDir}/woven_code/input`, 'woven_code');
       expect(mockArchive.finalize).toHaveBeenCalled();
     });
 
@@ -297,7 +296,7 @@ describe('Weaver Functions', () => {
   });
 
   describe('createLog function (tested via runWeaver)', () => {
-    it('should format stdout and stderr correctly', async () => {
+    it('should format log content correctly', async () => {
       (mockExecFile as any).mockImplementation((file: string, args: string[], callback: any) => {
         callback(null, 'Done', '');
       });
@@ -310,8 +309,7 @@ describe('Weaver Functions', () => {
         testTempDir
       );
 
-      expect(result).toBe('stdout: Done\n\nstderr: ');
-      expect(result).toContain('Done');
+      expect(result.logContent).toBe('Done');
     });
 
     it('should handle empty stderr', async () => {
@@ -327,8 +325,23 @@ describe('Weaver Functions', () => {
         testTempDir
       );
 
-      expect(result).toBe('stdout: Done\n\nstderr: ');
-      expect(result).toContain('Done');
+      expect(result.logContent).toBe('Done');
+    });
+
+    it('should combine stdout and stderr', async () => {
+      (mockExecFile as any).mockImplementation((file: string, args: string[], callback: any) => {
+        callback(null, 'Done', 'Warning message');
+      });
+
+      const result = await runWeaver(
+        testTool,
+        testInputFile,
+        testScriptFile,
+        testStandard,
+        testTempDir
+      );
+
+      expect(result.logContent).toBe('DoneWarning message');
     });
   });
 
@@ -347,12 +360,13 @@ describe('Weaver Functions', () => {
       };
       mockFs.createWriteStream.mockReturnValue(mockWriteStream as any);
 
-      await runWeaver(testTool, testInputFile, testScriptFile, testStandard, testTempDir);
+      const result = await runWeaver(testTool, testInputFile, testScriptFile, testStandard, testTempDir);
 
       // Verify output zip path creation
       expect(mockFs.createWriteStream).toHaveBeenCalledWith(
-        path.join(testTempDir, 'output.zip')
+        path.join(testTempDir, 'woven_code.zip')
       );
+      expect(result.wovenCodeZip).toBe(path.join(testTempDir, 'woven_code.zip'));
     });
   });
 });

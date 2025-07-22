@@ -2,7 +2,8 @@
 .openvscode-server/
 node_modules/
 .vscode*/
-extensions/*/dist/
+dist/
 *.vsix
-extensions/*/out/
-extensions/*/coverage/
+out/
+coverage/
+tmp/
