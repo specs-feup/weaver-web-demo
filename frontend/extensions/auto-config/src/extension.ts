@@ -4,32 +4,39 @@ import * as vscode from 'vscode';
 
 export async function apply_theme() {
   const tool = process.env.TOOL_NAME;
+  let config_path;
+  let theme;
+
   const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
 
-  if (!workspaceFolder) {
-    vscode.window.showErrorMessage('No workspace folder found.');
-    return;
-  }
-
-  const parentDir = path.resolve(workspaceFolder, '..');
-  const themes_path = path.join(parentDir, 'themes.json');
-
   try{
-    const raw = fs.readFileSync(themes_path, 'utf-8');
-    const themes_settings = JSON.parse(raw);
-    for (const [key,value] of Object.entries(themes_settings)){
-      const inspected = vscode.workspace.getConfiguration().inspect(key);
-      if (!inspected) {
-        console.warn(`Skipping unregistered theme key: ${key}`);
-        continue;
-      }
-      if(key === tool ){
-        await vscode.workspace.getConfiguration().update("workbench.colorTheme", value, vscode.ConfigurationTarget.Workspace);
-      }
+    if (!workspaceFolder) {
+      vscode.window.showErrorMessage('No workspace folder found.');
+      return;
     }
+
+    const parentDir = path.resolve(workspaceFolder, '..');
+    config_path = path.join(parentDir, 'config.json');
+    
+  
+    const raw = fs.readFileSync(config_path, 'utf-8');
+    const config = JSON.parse(raw);
+
+    const configTool = config[tool??"clava"];
+
+
+
+    theme = configTool["theme"];
   }
   catch (err) {
-    vscode.window.showErrorMessage(`Failed to apply settings from ${themes_path}: ${err}`);
+    vscode.window.showErrorMessage(`Failed to apply theme from ${config_path}: ${err}`);
+  }
+
+  if (theme) {
+    await vscode.workspace.getConfiguration().update("workbench.colorTheme", theme, vscode.ConfigurationTarget.Workspace);
+  } 
+  else {
+    vscode.window.showErrorMessage('No theme found to apply.');
   }
   
 }
