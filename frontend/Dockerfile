@@ -13,8 +13,6 @@ WORKDIR /home/workspace
 # Create necessary directories
 RUN mkdir -p /tmp/exts
 
-# Validate that the TOOL directory exists
-RUN if [ ! -d "files/${TOOL}" ]; then echo "Error: Directory files/${TOOL} does not exist." && exit 1; fi
 # Copy files with correct ownership from the start
 COPY --chown=openvscode-server:openvscode-server files/${TOOL} /home/workspace/files/
 COPY --chown=openvscode-server:openvscode-server ./extensions/*/*.vsix /tmp/exts/
