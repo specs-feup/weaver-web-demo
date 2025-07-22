@@ -1,5 +1,12 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
+import path from 'path';
+
+interface Option{
+    name: string,
+    values?: string[],
+    type: string
+}
 
 export class ScriptProvider {
     static getWeaveButtonScript(backendUrl: string): string {
@@ -7,7 +14,7 @@ export class ScriptProvider {
             const vscode = acquireVsCodeApi();
             function onButtonClick() {
                 // Use localhost since we're in a containerized environment
-                const button = document.getElementById('weaver-button');
+                const button = document.getElementsByClassName('weaver-button')[0];
                 if (button) {
                     button.disabled = true;
                     console.log("Congelado")

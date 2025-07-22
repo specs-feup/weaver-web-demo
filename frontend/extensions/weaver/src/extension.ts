@@ -42,6 +42,7 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
                     vscode.window.showInformationMessage(`File downloaded successfully`);
                 })
                 .catch(error => {
+                    vscode.window.showErrorMessage("tá aqui");
                     vscode.window.showErrorMessage(`Error downloading file: ${error.message}`);
                 });
             }
