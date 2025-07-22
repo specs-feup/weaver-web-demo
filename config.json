@@ -1,7 +1,7 @@
 {
   "clava" : {
     "theme" : "Light Red Theme",
-    "fileExtension" : ".cpp",
+    "fileExtension" : "cpp",
     "image" : {
       "imgWidth" : 234,
       "imgHeight" : 64
@@ -57,7 +57,7 @@
   },
   "kadabra" : {
     "theme" : "Light Yelow Theme",
-    "fileExtension" : ".java",
+    "fileExtension" : "java",
     "image" : {
       "imgWidth" : 234,
       "imgHeight" : 46

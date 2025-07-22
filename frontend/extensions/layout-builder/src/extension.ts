@@ -1,22 +1,53 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import path from 'path';
+import * as fs from 'fs';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export async function activate(context: vscode.ExtensionContext) {
     console.log('Extension "layout-builder" active');
+    
+    let config;
+    let fileExtension;
+    let workspaceFolder;
+    const tool = process.env.TOOL_NAME;
+    try {
+        workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+        if (!workspaceFolder) {
+            console.error('No workspace folder found');
+            return '';
+        }
+        
+        const parentDir = path.resolve(workspaceFolder.uri.fsPath, '..');
+        const configPath = path.join(parentDir, 'config.json');
+        
+        if (!fs.existsSync(configPath)) {
+            console.error(`Config file not found: ${configPath}`);
+            return '';
+        }
+        
+        const raw = fs.readFileSync(configPath, 'utf-8');
+        config = JSON.parse(raw);
 
-    const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+        const toolConfig = config[tool ?? "clava"];
+        if (!toolConfig?.options) {
+            console.error(`No options found for tool: ${tool}`);
+            return '';
+        }
 
-    if (!workspaceFolder) {
-        console.error('No workspace folder is open. The "layout-builder" extension requires an open workspace.');
-        return;
+        fileExtension = toolConfig["fileExtension"];
+
+    } catch (error) {
+        console.error('Couldnt find file extension in config.json:', error);
+        return ;
     }
+
     const uris = [
-        vscode.Uri.joinPath(workspaceFolder.uri, 'input/input.cpp'),
+        vscode.Uri.joinPath(workspaceFolder.uri, `input/input.${fileExtension}`),
         vscode.Uri.joinPath(workspaceFolder.uri, 'script.js'),
-        vscode.Uri.joinPath(workspaceFolder.uri, 'woven_code/input.cpp'),
+        vscode.Uri.joinPath(workspaceFolder.uri, `woven_code/input.${fileExtension}`),
         vscode.Uri.joinPath(workspaceFolder.uri, 'log.txt')
     ];
     
