@@ -185,7 +185,10 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
             webview, 
             this.extensionUri, 
             config.tool, 
-            config.backendUrl
+            config.backendUrl,
+            config.imageConfig,
+            config.extraOptions!,
+            config.logos!
         );
     }
 }

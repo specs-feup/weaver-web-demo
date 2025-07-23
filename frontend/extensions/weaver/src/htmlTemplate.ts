@@ -1,22 +1,7 @@
 import * as vscode from 'vscode';
 import { StyleProvider } from './styles';
 import { ScriptProvider } from './scripts';
-import path from 'path';
-import * as fs from 'fs';
-
-interface Option{
-    name: string,
-    values?: string[],
-    type: string
-}
-
-interface Logo {
-    link: string,   
-    fileName: string,
-    label: string,
-    width: number,
-    height: number
-}
+import { ImageConfig, Logo, Option } from './config';
 
 export class HtmlTemplateProvider {
 
@@ -80,54 +65,15 @@ export class HtmlTemplateProvider {
         return res;
     }
 
-
     static generate(
         webview: vscode.Webview, 
         extensionUri: vscode.Uri, 
         tool: string,
-        backendUrl: string
+        backendUrl: string,
+        imageConfig: ImageConfig,
+        extraOptions: Option[],
+        logos: Logo[]
     ): string {
-        let config;
-        let img_width;
-        let img_height;
-        let logos;
-        let toolOptions;
-        
-        try {
-            const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-            if (!workspaceFolder) {
-                console.error('No workspace folder found');
-                return '';
-            }
-            
-            const parentDir = path.resolve(workspaceFolder, '..');
-            const configPath = path.join(parentDir, 'config.json');
-            
-            if (!fs.existsSync(configPath)) {
-                console.error(`Config file not found: ${configPath}`);
-                return '';
-            }
-            
-            const raw = fs.readFileSync(configPath, 'utf-8');
-            config = JSON.parse(raw);
-
-            const toolConfig = config[tool ?? "clava"];
-            if (!toolConfig?.options) {
-                console.error(`No options found for tool: ${tool}`);
-                return '';
-            }
-
-            toolOptions = toolConfig["options"];
-
-            logos = config[tool?? "clava"]["logos"];
-            
-            img_width = config[tool?? "clava"]["image"]["img_width"];
-            img_height = config[tool?? "clava"]["image"]["img_height"];
-
-        } catch (error) {
-            console.error('Error in Generate:', error);
-            return '';
-        }
 
         return `
         <!DOCTYPE html>
@@ -136,7 +82,7 @@ export class HtmlTemplateProvider {
                 <div style="display: flex; flex-direction: row;">
                     <div style="height:100vh; max-width:fit-content; display:flex; flex-direction: column; gap: 30px; align-items: center; padding: 10px">
 
-                        ${this.createImage(tool,extensionUri,webview,img_width,img_height)}
+                        ${this.createImage(tool, extensionUri, webview, imageConfig.width, imageConfig.height)}
 
                         <style>
                             .profiles-editor .sidebar-view {
@@ -150,12 +96,12 @@ export class HtmlTemplateProvider {
 
                         <div style="display:flex; flex-direction: column; gap: 20px">
 
-                            ${this.assembleOptions(toolOptions, tool, backendUrl)}
+                            ${this.assembleOptions(extraOptions, tool, backendUrl)}
 
                         </div>
 
                         <div style="display:flex; flex-direction: column; gap: 10px; margin-top: auto; margin-bottom: 10px">
-                            ${this.createLogoImage(webview,extensionUri,logos)}
+                            ${this.createLogoImage(webview, extensionUri, logos)}
                         </div>
                     </div>
                 </div>

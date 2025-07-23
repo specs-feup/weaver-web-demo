@@ -36,7 +36,8 @@
           "OpenCL 2.0",
           "OpenCL C++ 1.0"
         ],
-        "type" : "select"
+        "type" : "select",
+        "flag": "-std"
       }
     ],
     "logos" :[
