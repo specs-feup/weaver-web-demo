@@ -28,13 +28,12 @@ services:
         TOOL: ${TOOL}
     container_name: openvscode-server
     ports:
-      - "5000:3000"
+      - "3000:3000"
     environment:
       - DISABLE_TERMINAL=true
       - TOOL_NAME=${TOOL}
       - BACKEND_URL=http://backend:4000
     volumes:
-      - ./frontend/themes.json:/home/workspace/themes.json
       - ./config.json:/home/workspace/config.json
       - ./frontend/custom-workspace-settings.json:/home/workspace/.vscode/custom-workspace-settings.json
       - ./frontend/custom-user-settings.json:/home/workspace/.vscode/custom-user-settings.json

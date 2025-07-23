@@ -11,6 +11,7 @@ export async function activate(context: vscode.ExtensionContext) {
     
     let config;
     let fileExtension;
+    let defaultFileName;
     let workspaceFolder;
     const tool = process.env.TOOL_NAME;
     try {
@@ -38,16 +39,16 @@ export async function activate(context: vscode.ExtensionContext) {
         }
 
         fileExtension = toolConfig["fileExtension"];
-
+        defaultFileName = toolConfig["defaultFileName"];
     } catch (error) {
-        console.error('Couldnt find file extension in config.json:', error);
+        console.error('Couldn`t find file extension in config.json:', error);
         return ;
     }
 
     const uris = [
-        vscode.Uri.joinPath(workspaceFolder.uri, `input/input.${fileExtension}`),
+        vscode.Uri.joinPath(workspaceFolder.uri, `input/${defaultFileName}.${fileExtension}`),
         vscode.Uri.joinPath(workspaceFolder.uri, 'script.js'),
-        vscode.Uri.joinPath(workspaceFolder.uri, `woven_code/input.${fileExtension}`),
+        vscode.Uri.joinPath(workspaceFolder.uri, `woven_code/${defaultFileName}.${fileExtension}`),
         vscode.Uri.joinPath(workspaceFolder.uri, 'log.txt')
     ];
     
