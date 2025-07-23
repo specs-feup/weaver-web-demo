@@ -1,13 +1,3 @@
-import * as vscode from 'vscode';
-import * as fs from 'fs';
-import path from 'path';
-
-interface Option{
-    name: string,
-    values?: string[],
-    type: string
-}
-
 export class ScriptProvider {
     static getWeaveButtonScript(backendUrl: string): string {
         return `

@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import { StyleProvider } from './styles';
 import { ScriptProvider } from './scripts';
 import { ImageConfig, Logo, Option } from './config';
 
@@ -75,37 +74,32 @@ export class HtmlTemplateProvider {
         logos: Logo[]
     ): string {
 
+        const cssUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'media', 'sidebar.css'));
+
         return `
         <!DOCTYPE html>
         <html lang="en">
-            <body>
-                <div style="display: flex; flex-direction: row;">
-                    <div style="height:100vh; max-width:fit-content; display:flex; flex-direction: column; gap: 30px; align-items: center; padding: 10px">
+        <head>
+            <link href="${cssUri}" rel="stylesheet" />
+        </head>
+        <body>
+            <div style="display: flex; flex-direction: row;">
+                <div style="height:100vh; max-width:fit-content; display:flex; flex-direction: column; gap: 30px; align-items: center; padding: 10px">
 
-                        ${this.createImage(tool, extensionUri, webview, imageConfig.width, imageConfig.height)}
+                    ${this.createImage(tool, extensionUri, webview, imageConfig.width, imageConfig.height)}
 
-                        <style>
-                            .profiles-editor .sidebar-view {
-                                height:100%;
-                                width: 320px;
-                            }
-                            ${StyleProvider.getDropDownStyle()}
-                            ${StyleProvider.getWeaveButtonStyle(tool)}
-                            ${StyleProvider.getLoaderStyle(tool)}
-                        </style>
+                    <div style="display:flex; flex-direction: column; gap: 20px">
 
-                        <div style="display:flex; flex-direction: column; gap: 20px">
+                        ${this.assembleOptions(extraOptions, tool, backendUrl)}
 
-                            ${this.assembleOptions(extraOptions, tool, backendUrl)}
+                    </div>
 
-                        </div>
-
-                        <div style="display:flex; flex-direction: column; gap: 10px; margin-top: auto; margin-bottom: 10px">
-                            ${this.createLogoImage(webview, extensionUri, logos)}
-                        </div>
+                    <div style="display:flex; flex-direction: column; gap: 10px; margin-top: auto; margin-bottom: 10px">
+                        ${this.createLogoImage(webview, extensionUri, logos)}
                     </div>
                 </div>
-            </body>
+            </div>
+        </body>
         </html>
         `;
     }
