@@ -79,7 +79,6 @@ async function runWeaver(
     const inputPath = path.join(tempDir, "input");
     await unzipFile(inputFile, inputPath);
     const resultFolderName = 'woven_code';
-    const logFileName = 'log.txt';
 
     // -l outputs the log into a log.txt file
     const args = ['classic', scriptFile, '-p', inputPath, '-o', tempDir];
@@ -96,8 +95,8 @@ async function runWeaver(
 
     await new Promise<void>((resolve, reject) => {
         execFile(tool, args, (error, stdout, stderr) => {
-            // Concatenate stdout and stderr for the log
-            logContent = stdout + stderr;
+            // Concatenate stdout, stderr and error for the log
+            logContent = stdout + '\n\n' + stderr + '\n' + error + '\n\n';
             
             if (error) {
                 reject(new Error(`Weaver tool failed: ${error.message}\n${stderr}`));
