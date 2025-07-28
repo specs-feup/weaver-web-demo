@@ -104,11 +104,11 @@ Technically also optional. Go to `frontend/extensions/weaver/media` and add your
 > [!WARNING]
 > The file's naming convention is important. The file must be a png and have the same name as the weaver tool. For example, `clava.png`.
 
-### 5. Extras
+### 5. Configuration Options
 
 If your weaver has extra options you would like to add to the web editor, e.g Clava's C standard, it's very simple.
 
-Go the the `config.json` and create an `options` object. Inside this object you can create new objects for each weaver configuration option you want to add to the web editor. The web editor currently only supports dropdown and checkbox options.
+Go the the `config.json` and create an `options` list. Inside this list you can create new objects for each weaver configuration option you want to add to the web editor. The web editor currently only supports dropdown and checkbox options.
 
 #### Dropdown element example
 
@@ -167,7 +167,25 @@ This is an example with dummy data.
 - `type` is the type of configuration option, in this case it's `checkbox`
 - `flag` represents the flag that the weaver's CLI will detect to set this configuration to true, if present
 
-### 6. Building the image
+### 6. Extra Logos
+
+If you want to some extra logos like the SPECS or the FEUP one, do the following:
+
+- Go to `frontend/extensions/weaver/media` and add your logo
+- Create a `logos` list in the `config.json` file
+- Add a new object for you logo, with the following format:
+
+```json
+{
+  "link" : "https://specs.fe.up.pt/",
+  "fileName" : "specs_logo.png",
+  "label" : "SPECS-logo",
+  "width" : 170,
+  "height" : 67
+}
+```
+
+### 7. Building the image
 
 Each weaver's image contains 2 containers - one for the backend and another for the frontend. The image's behaviour depends
 on the `TOOL` environment variable when building the image. If it is not set, nothing will work.
