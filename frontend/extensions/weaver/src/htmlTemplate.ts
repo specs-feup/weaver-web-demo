@@ -39,7 +39,7 @@ export class HtmlTemplateProvider {
             </select>
         </div>
         <script>
-            ${ScriptProvider.getDropdownScript(values)}
+            ${ScriptProvider.getDropdownScript(values,"standardChanged")}
         </script>`;
         return select;
     }

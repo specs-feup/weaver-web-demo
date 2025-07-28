@@ -66,13 +66,13 @@ export class ScriptProvider {
 }
 
 
-    static getDropdownScript(values : string[]): string {
+    static getDropdownScript(values : string[], message: string): string {
 
-        const standardsJson = JSON.stringify(values);
+        const lista = JSON.stringify(values);
         return `
                 const select = document.getElementById('standard-select');
                 if (select) {
-                    ${standardsJson}.forEach( standard => {
+                    ${lista}.forEach( standard => {
                         const option = document.createElement('option');
                         option.value = standard;
                         option.textContent = standard;
@@ -84,7 +84,7 @@ export class ScriptProvider {
                 function onDropdownChange() {
                     const select = document.getElementById('standard-select');
                     const selectedValue = select.value;
-                    vscode.postMessage({ command: 'dropdownChanged', value: selectedValue });
+                    vscode.postMessage({ command: "${message}", value: selectedValue });
                 }`;
     }
 }

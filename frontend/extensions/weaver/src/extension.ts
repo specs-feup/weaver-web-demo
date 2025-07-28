@@ -17,6 +17,13 @@ interface WeaverResponse {
     wovenCodeZip: string;   // base64 encoded zip
 }
 
+interface Request {
+    message : string;
+    args: string[];
+}
+
+const args : string[] = [];
+
 class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
     constructor(private readonly extensionUri: vscode.Uri, private readonly context: vscode.ExtensionContext) {}
 
@@ -46,8 +53,15 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
                     vscode.window.showErrorMessage(`Error downloading file: ${error.message}`);
                 });
             }
-        if (message && message.command === 'dropdownChanged') {
+        if (message && message.command === 'standardChanged') {
                 const selectedStandard = message.value;
+                if(args.indexOf("-std") === -1){
+                    args.push("-std");
+                    args.push(selectedStandard.toLowerCase());
+                }
+                else{
+                    args[args.indexOf("-std")+1] = selectedStandard.toLowerCase();
+                }
                 this.context.globalState.update('selectedStandard', selectedStandard.toLowerCase());
                 vscode.window.showInformationMessage(`Selected standard: ${selectedStandard.toLowerCase()}`);
             }
@@ -61,8 +75,9 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
     private async buildRequest(): Promise<FormData> {
         // Creates a FormData object that will be sent to the server
         const formData = new FormData();
-        const selectedStandard = this.context.globalState.get('selectedStandard', 'c++17');
-        console.log('Using standard:', selectedStandard);
+        console.log('Using args:', args);
+        const argsJson = JSON.stringify(args);
+        console.log('Args json:', argsJson);
 
         // Zips the input folder and appends it to the FormData
         const inputFolderPath = "/home/workspace/files/input/";
@@ -80,7 +95,7 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
             throw new Error('Script file not found at /home/workspace/files/script.js');
         }
 
-        formData.append('standard', selectedStandard || 'c++17'); // Default to c++17 if not set
+        formData.append('args', argsJson ); 
         console.log('FormData contents:');
         formData.forEach((value, key) => {
             console.log(` - ${key}: ${value}`);
@@ -94,7 +109,7 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
      * If the request fails, it will throw an error.
      * @param url The URL to send the request to
      */
-    private async sendServerRequest(url: string): Promise<WeaverResponse> {
+    private async sendServerRequest(url: any): Promise<WeaverResponse> {
         
         const formData = await this.buildRequest();
 

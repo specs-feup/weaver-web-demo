@@ -82,16 +82,16 @@ app.post(
       return;
     }
     console.log('Received request body:', req.body);
-    console.log('Standard from request:', req.body.standard);
+    console.log('Args from request:', req.body.args);
     // Get args 
     const inputFile = files?.zipfile?.[0];
     const scriptFile = files?.file?.[0];
-    const standard = req.body.standard || 'c++17'; // Default to c++17 if not set
+    const args = JSON.parse(req.body.args || '[]');
     const sessionTempDir = path.join(tempDir, sessionId);
 
-    console.log('Using standard:', standard);
+    console.log('Using args:', args);
 
-    runWeaver(tool || '', inputFile?.path || '', scriptFile?.path || '', standard, sessionTempDir)
+    runWeaver(tool || '', inputFile?.path || '', scriptFile?.path || '', args, sessionTempDir)
       .then((result) => {
         console.log('Weaver tool executed successfully');
         

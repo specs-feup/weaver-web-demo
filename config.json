@@ -36,6 +36,7 @@
           "OpenCL 2.0",
           "OpenCL C++ 1.0"
         ],
+        "defaultValue" : "C++11" ,
         "type" : "select",
         "flag": "-std"
       }

@@ -46,7 +46,7 @@ function zipFolder(sourceFolder: string, outPath: string): Promise<void> {
  * @param tool The Weaver tool to use (e.g., 'clava')
  * @param inputFile The input file to weave, which is a zip file that will be unzipped
  * @param scriptFile The javascript file to use for weaving
- * @param standard The standard to use for weaving (e.g., 'c++11')
+ * @param args The Arguments to use for weaving (e.g., '-std c++11')
  * @param tempDir The temporary directory to use for input and output files (default is 'temp/')
  * @returns A promise that resolves to an object with log content string and path to woven code zip
  */
@@ -54,7 +54,7 @@ async function runWeaver(
     tool: string, 
     inputFile: string, 
     scriptFile: string, 
-    standard: string, 
+    args: string[], 
     tempDir: string = 'temp/'
 ){
 
@@ -62,7 +62,7 @@ async function runWeaver(
     console.log('tool:', tool);
     console.log('inputFile:', inputFile);
     console.log('scriptFile:', scriptFile);
-    console.log('standard:', standard);
+    console.log('args:', args);
     console.log('tempDir:', tempDir);
     // Throw error if any of the required parameters are missing
     if (!tool) {
@@ -80,21 +80,14 @@ async function runWeaver(
     await unzipFile(inputFile, inputPath);
     const resultFolderName = 'woven_code';
 
-    // -l outputs the log into a log.txt file
-    const args = ['classic', scriptFile, '-p', inputPath, '-o', tempDir];
+    const finalArgs = ['classic', scriptFile, '-p', inputPath, '-o', tempDir, ...args];
 
-    // Only clava has a standard option
-    if (tool === 'clava' && standard) {
-        args.push('-std', standard);
-        console.log('args pushed standard:', standard);
-    }
-
-    console.log(`Running command: ${tool} ${args.join(' ')}`);
+    console.log(`Running command: ${tool} ${finalArgs.join(' ')}`);
 
     let logContent = '';
 
     await new Promise<void>((resolve, reject) => {
-        execFile(tool, args, (error, stdout, stderr) => {
+        execFile(tool, finalArgs, (error, stdout, stderr) => {
             // Concatenate stdout, stderr and error for the log
             logContent = stdout + '\n\n' + stderr + '\n' + error + '\n\n';
             
