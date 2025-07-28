@@ -1,31 +1,70 @@
 export class ScriptProvider {
     static getWeaveButtonScript(backendUrl: string): string {
-        return `
-            const vscode = acquireVsCodeApi();
-            function onButtonClick() {
-                // Use localhost since we're in a containerized environment
-                const button = document.getElementsByClassName('weaver-button')[0];
-                if (button) {
-                    button.disabled = true;
-                    console.log("Congelado")
+    return `
+        const vscode = acquireVsCodeApi();
 
-                    setTimeout(() => {
-                        button.disabled = false;
-                        console.log("Descongelado")
-                    }, 5000); 
+        function grayOutColor(color) {
+            // Handle hex format
+            if (color.startsWith("#")) {
+                const hex = color.replace("#", "");
+                if (hex.length === 6) {
+                    let r = parseInt(hex.substring(0, 2), 16);
+                    let g = parseInt(hex.substring(2, 4), 16);
+                    let b = parseInt(hex.substring(4, 6), 16);
+
+                    const toGray = c => Math.round(c + 0.2 * (128 - c));
+                    r = toGray(r);
+                    g = toGray(g);
+                    b = toGray(b);
+
+                    const toHex = n => n.toString(16).padStart(2, "0");
+                    return "#" + toHex(r) + toHex(g) + toHex(b);
                 }
-                else {
-                    console.error("Button element not found");
-                }
-                const apiUrl = '${backendUrl}/api/weave';
-                
-                vscode.postMessage({ 
-                    command: 'buttonClicked',
-                    url: apiUrl
-                });
             }
-        `;
-    }
+
+            // Handle rgb/rgba format
+            const match = color.match(/rgba?\\((\\d+),\\s*(\\d+),\\s*(\\d+)/);
+            if (match) {
+                let [r, g, b] = match.slice(1, 4).map(Number);
+                const toGray = c => Math.round(c + 0.2 * (128 - c));
+                r = toGray(r);
+                g = toGray(g);
+                b = toGray(b);
+                return \`rgb(\${r}, \${g}, \${b})\`;
+            }
+
+            // fallback
+            return color;
+        }
+
+        function onButtonClick() {
+            const button = document.getElementsByClassName('weaver-button')[0];
+            if (button) {
+                const originalColor = window.getComputedStyle(button).backgroundColor;
+                const grayColor = grayOutColor(originalColor);
+
+                button.disabled = true;
+                button.style.backgroundColor = grayColor;
+                console.log("Congelado");
+
+                setTimeout(() => {
+                    button.disabled = false;
+                    button.style.backgroundColor = originalColor;
+                    console.log("Descongelado");
+                }, 5000);
+            } else {
+                console.error("Button element not found");
+            }
+
+            const apiUrl = '${backendUrl}/api/weave';
+            vscode.postMessage({ 
+                command: 'buttonClicked',
+                url: apiUrl
+            });
+        }
+    `;
+}
+
 
     static getDropdownScript(values : string[]): string {
 
