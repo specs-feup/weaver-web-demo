@@ -88,5 +88,36 @@
         "height" : 59
       }
     ]
+  },
+  "metafor" : {
+    "theme" : "Light Yellow Theme",
+    "defaultFileName": "input",
+    "fileExtension" : "json",
+    "image" : {
+      "imgWidth" : 234,
+      "imgHeight" : 46
+    },
+    "options" : [
+      {
+        "name" : "weaver-metafor",
+        "type" : "weaveApplication" 
+      }
+    ],
+    "logos" :[
+      {
+        "link" : "https://specs.fe.up.pt/",
+        "fileName" : "specs_logo.png",
+        "label" : "SPECS-logo",
+        "width" : 170,
+        "height" : 67
+      },
+      {
+        "link" : "https://sigarra.up.pt/feup",
+        "fileName" : "feup_logo.png",
+        "label" : "FEUP-logo",
+        "width" : 170,
+        "height" : 59
+      }
+    ]
   }
 }

@@ -18,6 +18,7 @@
   "dependencies": {
     "@specs-feup/clava": "^3.0.17",
     "@specs-feup/kadabra": "^1.0.2",
+    "@specs-feup/metafor": "^0.0.2",
     "archiver": "^7.0.1",
     "cors": "^2.8.5",
     "dotenv": "^17.0.1",
