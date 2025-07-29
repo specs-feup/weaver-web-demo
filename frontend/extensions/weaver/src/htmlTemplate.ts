@@ -21,11 +21,11 @@ export class HtmlTemplateProvider {
         <img src=${webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'media', `${tool}.png`))} alt="${tool}" width=${imgWidth} height=${imgHeight}>
         `;
     }
-    static button(name : string, backendUrl: string): string {
+    static weaveApplication(name : string, backendUrl: string): string {
         const button = `
-        <button id="${name}" class ="weaver-button" onclick="onButtonClick()"><span class="text">Weave Application</span></button>
+        <button id="${name}" class ="weaver-button" onclick="weaveApplication()"><span class="text">Weave Application</span></button>
         <script>
-            ${ScriptProvider.getWeaveButtonScript(backendUrl)}
+            ${ScriptProvider.getWeaveApplicationScript(backendUrl)}
         </script>
         `;
         return button;
@@ -34,12 +34,12 @@ export class HtmlTemplateProvider {
     static select(name : string, values: string[]): string {
         const select = `
         <div id = "${name}" class="custom-select" style = "display:flex; flex-direction: column" >
-            <p>Please select a standard:</p>
-            <select id="standard-select" onchange="onDropdownChange()">
+            <p>Please select a ${name}:</p>
+            <select id="${name}-select" onchange="onSelectChange()">
             </select>
         </div>
         <script>
-            ${ScriptProvider.getDropdownScript(values,"standardChanged")}
+            ${ScriptProvider.getSelectScript(values,name)}
         </script>`;
         return select;
     }
@@ -48,8 +48,8 @@ export class HtmlTemplateProvider {
         let res = '';
         for(const option of toolOptions){
             switch (option.type) {
-                case 'button':
-                    res += this.button(option.name, backendUrl);
+                case 'weaveApplication':
+                    res += this.weaveApplication(option.name, backendUrl);
                     break;
             
                 case 'select':

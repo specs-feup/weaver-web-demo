@@ -1,5 +1,5 @@
 export class ScriptProvider {
-    static getWeaveButtonScript(backendUrl: string): string {
+    static getWeaveApplicationScript(backendUrl: string): string {
     return `
         const vscode = acquireVsCodeApi();
 
@@ -37,7 +37,7 @@ export class ScriptProvider {
             return color;
         }
 
-        function onButtonClick() {
+        function weaveApplication() {
             const button = document.getElementsByClassName('weaver-button')[0];
             if (button) {
                 const originalColor = window.getComputedStyle(button).backgroundColor;
@@ -53,12 +53,12 @@ export class ScriptProvider {
                     console.log("Descongelado");
                 }, 5000);
             } else {
-                console.error("Button element not found");
+                console.error("Weave Application element not found");
             }
 
             const apiUrl = '${backendUrl}/api/weave';
             vscode.postMessage({ 
-                command: 'buttonClicked',
+                command: 'weave',
                 url: apiUrl
             });
         }
@@ -66,11 +66,11 @@ export class ScriptProvider {
 }
 
 
-    static getDropdownScript(values : string[], message: string): string {
+    static getSelectScript(values : string[], name: string): string {
 
         const lista = JSON.stringify(values);
         return `
-                const select = document.getElementById('standard-select');
+                const select = document.getElementById('${name}-select');
                 if (select) {
                     ${lista}.forEach( standard => {
                         const option = document.createElement('option');
@@ -81,10 +81,10 @@ export class ScriptProvider {
                 } else {
                     console.error("Select element not found");
                 }
-                function onDropdownChange() {
+                function onSelectChange() {
                     const select = document.getElementById('standard-select');
                     const selectedValue = select.value;
-                    vscode.postMessage({ command: "${message}", value: selectedValue });
+                    vscode.postMessage({ command: "${name}Changed", value: selectedValue });
                 }`;
     }
 }

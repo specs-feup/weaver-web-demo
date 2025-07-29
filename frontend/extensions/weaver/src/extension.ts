@@ -17,12 +17,34 @@ interface WeaverResponse {
     wovenCodeZip: string;   // base64 encoded zip
 }
 
-interface Request {
-    message : string;
-    args: string[];
-}
+let info : Record<string,string> = {} ;
 
-const args : string[] = [];
+let args : string[] = [];
+
+function assembleArgs(){
+    args = [];
+    const config = ConfigProvider.getConfig();
+    const options = config.extraOptions;
+    for(const name in info){
+        switch (name) {
+            case "standard":
+                for(const option of options){
+                    if(option.name === name && option.flag){
+                        args.push(option.flag);
+                        args.push(info[name]);
+                    }
+                }
+                break;
+            case "incompletePath":
+                for(const option of options){
+                    if(option.name === name && option.flag && info[name] === "true"){
+                        args.push(option.flag);
+                    }
+                }
+                break;
+        }
+    }
+}
 
 class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
     constructor(private readonly extensionUri: vscode.Uri, private readonly context: vscode.ExtensionContext) {}
@@ -41,30 +63,23 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
         webviewView.webview.html = this.getHtmlForWebview(webviewView.webview);
 
         webviewView.webview.onDidReceiveMessage(message => {	
-        if (message && message.command === 'buttonClicked') {
-            //So the user doesnt misunderstand the previous result for the next
-            this.sendServerRequest(message.url)
-                .then((data) => {
-                    this.updateWorkspaceFiles(data);
-                    vscode.window.showInformationMessage(`File downloaded successfully`);
-                })
-                .catch(error => {
-                    vscode.window.showErrorMessage("tá aqui");
-                    vscode.window.showErrorMessage(`Error downloading file: ${error.message}`);
-                });
-            }
-        if (message && message.command === 'standardChanged') {
-                const selectedStandard = message.value;
-                if(args.indexOf("-std") === -1){
-                    args.push("-std");
-                    args.push(selectedStandard.toLowerCase());
+            if (message && message.command === 'weave') {
+                assembleArgs();
+                this.sendServerRequest(message.url)
+                    .then((data) => {
+                        this.updateWorkspaceFiles(data);
+                        vscode.window.showInformationMessage(`File downloaded successfully`);
+                    })
+                    .catch(error => {
+                        vscode.window.showErrorMessage("tá aqui");
+                        vscode.window.showErrorMessage(`Error downloading file: ${error.message}`);
+                    });
                 }
-                else{
-                    args[args.indexOf("-std")+1] = selectedStandard.toLowerCase();
+            if (message && message.command === 'standardChanged') {
+                    const selectedStandard = message.value;
+                    info["standard"] = selectedStandard.toLowerCase();
+                    vscode.window.showInformationMessage(`Selected standard: ${selectedStandard.toLowerCase()}`);
                 }
-                this.context.globalState.update('selectedStandard', selectedStandard.toLowerCase());
-                vscode.window.showInformationMessage(`Selected standard: ${selectedStandard.toLowerCase()}`);
-            }
         });
     }        
 

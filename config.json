@@ -10,7 +10,7 @@
     "options" : [
       {
         "name" : "weaver-clava",
-        "type" : "button" 
+        "type" : "weaveApplication" 
       },
       {
         "name" : "standard",
@@ -69,7 +69,7 @@
     "options" : [
       {
         "name" : "weaver-kadabra",
-        "type" : "button" 
+        "type" : "weaveApplication" 
       }
     ],
     "logos" :[
