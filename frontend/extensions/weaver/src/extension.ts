@@ -21,28 +21,40 @@ let info : Record<string,string> = {} ;
 
 let args : string[] = [];
 
-function assembleArgs(){
+function argsAssembler(){
     args = [];
-    const config = ConfigProvider.getConfig();
-    const options = config.extraOptions;
     for(const name in info){
         switch (name) {
             case "standard":
-                for(const option of options){
-                    if(option.name === name && option.flag){
-                        args.push(option.flag);
-                        args.push(info[name]);
-                    }
+                args.push("-std");
+                args.push(info[name].toLowerCase());
+                break;
+            case "checkbox":
+                if(info[name] === "true"){
+                    args.push("-example");
                 }
                 break;
-            case "incompletePath":
-                for(const option of options){
-                    if(option.name === name && option.flag && info[name] === "true"){
-                        args.push(option.flag);
-                    }
-                }
-                break;
+            //here you add a case for the new option and decide if you want to add a flag 
+            // and/or a value to the args list 
         }
+    }
+}
+
+function messageHandler(message: any){
+    const config = ConfigProvider.getConfig();
+    const weaverOptions = config.extraOptions;
+    for(const option of weaverOptions) {
+        const command = option.name + "Changed";
+        if (message && message.command === command) {
+            if(option.type === 'select') {
+                const value = message.value;
+                info[option.name] = value;
+                vscode.window.showInformationMessage(`Selected '${option.name}': ${value}`);
+            } else {
+                vscode.window.showErrorMessage(`Not implemented yet for type '${option.type}'`);
+            }
+            break;
+        }       
     }
 }
 
@@ -64,7 +76,7 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
 
         webviewView.webview.onDidReceiveMessage(message => {	
             if (message && message.command === 'weave') {
-                assembleArgs();
+                argsAssembler();
                 this.sendServerRequest(message.url)
                     .then((data) => {
                         this.updateWorkspaceFiles(data);
@@ -75,11 +87,7 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
                         vscode.window.showErrorMessage(`Error downloading file: ${error.message}`);
                     });
                 }
-            if (message && message.command === 'standardChanged') {
-                    const selectedStandard = message.value;
-                    info["standard"] = selectedStandard.toLowerCase();
-                    vscode.window.showInformationMessage(`Selected standard: ${selectedStandard.toLowerCase()}`);
-                }
+            messageHandler(message);
         });
     }        
 
