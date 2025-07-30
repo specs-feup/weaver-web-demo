@@ -92,4 +92,15 @@ export class ScriptProvider {
                 onSelectChange();
                 `;
     }
+
+    static getCheckboxScript( name: string): string{
+        return `
+                function onCheckboxChange() { 
+                    const checkbox = document.getElementById('${name}-checkbox');
+                    const isChecked = checkbox.checked;
+                    vscode.postMessage({ command: "${name}Changed", value: isChecked });
+                }
+                onCheckboxChange();
+                `;
+    }
 }
