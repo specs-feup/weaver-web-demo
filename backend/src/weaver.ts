@@ -93,10 +93,10 @@ async function runWeaver(
             
             if (error) {
                 // If the process itself failed, a.k.a exit code is not 0
-                reject(stderr || error);
+                reject(logContent);
             } else if (stderr && /error/i.test(stderr)) {
                 // If stderr contains an error message
-                reject(stderr || error);
+                reject(logContent);
             } else {
                 resolve();
             }
