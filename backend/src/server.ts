@@ -118,7 +118,7 @@ app.post(
         }
         
         res.status(200).json({ 
-          logContent: error.logContent || 'Weaver failed',
+          logContent: error || 'Weaver failed',
           wovenCodeZip: null
         });
       });
