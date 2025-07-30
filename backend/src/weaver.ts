@@ -92,9 +92,11 @@ async function runWeaver(
             logContent = stdout + '\n\n' + stderr + '\n' + error + '\n\n';
             
             if (error) {
-                reject(new Error(`Weaver tool failed: ${error.message}\n${stderr}`));
+                // If the process itself failed, a.k.a exit code is not 0
+                reject(stderr || error);
             } else if (stderr && /error/i.test(stderr)) {
-                reject(new Error(`Weaver tool stderr contains error: ${stderr}`));
+                // If stderr contains an error message
+                reject(stderr || error);
             } else {
                 resolve();
             }

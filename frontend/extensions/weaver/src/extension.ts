@@ -83,7 +83,6 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
                         vscode.window.showInformationMessage(`File downloaded successfully`);
                     })
                     .catch(error => {
-                        vscode.window.showErrorMessage("tá aqui");
                         vscode.window.showErrorMessage(`Error downloading file: ${error.message}`);
                     });
                 }
@@ -156,6 +155,12 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
         // Write log content to a file
         const logPath = path.join("/home/workspace/files/", 'log.txt');
         fs.writeFileSync(logPath, data.logContent, 'utf8');
+
+        // If it's null, we don't have a zip file to process
+        // This happens in case of a weaver error, where only the log is returned and the zip is null
+        if (data.wovenCodeZip === null) {
+            return;
+        }
 
         // Convert base64 zip to buffer
         const zipBuffer = Buffer.from(data.wovenCodeZip, 'base64');

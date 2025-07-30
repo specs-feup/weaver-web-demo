@@ -117,7 +117,10 @@ app.post(
           fs.rmSync(sessionTempDir, { recursive: true, force: true });
         }
         
-        res.status(500).json({ error: 'An internal server error occurred. Please try again later.' });
+        res.status(200).json({ 
+          logContent: error?.message || 'Weaver failed',
+          wovenCodeZip: null
+        });
       });
   }
 );
