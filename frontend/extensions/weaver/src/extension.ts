@@ -29,11 +29,11 @@ function argsAssembler(){
                 args.push("-std");
                 args.push(info[name].toLowerCase());
                 break;
-            case "checkbox":
-                if(info[name] === "true"){
-                    args.push("-example");
-                }
-                break;
+            // case "exemplo":
+            //     if(info[name]){
+            //         args.push("-exemplo");
+            //     }
+            //     break;
             //here you add a case for the new option and decide if you want to add a flag 
             // and/or a value to the args list 
         }
@@ -50,10 +50,18 @@ function messageHandler(message: any){
                 const value = message.value;
                 info[option.name] = value;
                 vscode.window.showInformationMessage(`Selected '${option.name}': ${value}`);
-            } else {
+            } 
+            else if(option.type === 'checkbox') {
+                const value = message.value;
+                info[option.name] = value;
+                vscode.window.showInformationMessage(`Checked '${option.name}': ${value}`);
+            }
+
+            else {
                 vscode.window.showErrorMessage(`Not implemented yet for type '${option.type}'`);
             }
             break;
+            
         }       
     }
 }

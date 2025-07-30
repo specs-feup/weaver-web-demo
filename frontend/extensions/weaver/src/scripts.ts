@@ -66,7 +66,7 @@ export class ScriptProvider {
 }
 
 
-    static getSelectScript(values : string[], name: string): string {
+    static getSelectScript(values : string[], name: string, defaultValue : string): string {
 
         const lista = JSON.stringify(values);
         return `
@@ -75,16 +75,32 @@ export class ScriptProvider {
                     ${lista}.forEach( standard => {
                         const option = document.createElement('option');
                         option.value = standard;
+                        if(standard === "${defaultValue}"){
+                            option.selected = true;
+                        }
                         option.textContent = standard;
                         select.appendChild(option);
                     });
                 } else {
                     console.error("Select element not found");
                 }
-                function onSelectChange() {
-                    const select = document.getElementById('standard-select');
+                function onSelectChange() { 
+                    const select = document.getElementById('${name}-select');
                     const selectedValue = select.value;
                     vscode.postMessage({ command: "${name}Changed", value: selectedValue });
-                }`;
+                }
+                onSelectChange();
+                `;
+    }
+
+    static getCheckboxScript( name: string): string{
+        return `
+                function onCheckboxChange() { 
+                    const checkbox = document.getElementById('${name}-checkbox');
+                    const isChecked = checkbox.checked;
+                    vscode.postMessage({ command: "${name}Changed", value: isChecked });
+                }
+                onCheckboxChange();
+                `;
     }
 }

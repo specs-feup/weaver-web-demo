@@ -31,7 +31,7 @@ export class HtmlTemplateProvider {
         return button;
     }
 
-    static select(name : string, values: string[]): string {
+    static select(name : string, values: string[], defaultValue: string): string {
         const select = `
         <div id = "${name}" class="custom-select" style = "display:flex; flex-direction: column" >
             <p>Please select a ${name}:</p>
@@ -39,25 +39,40 @@ export class HtmlTemplateProvider {
             </select>
         </div>
         <script>
-            ${ScriptProvider.getSelectScript(values,name)}
+            ${ScriptProvider.getSelectScript(values,name,defaultValue)}
         </script>`;
         return select;
     }
 
-    static assembleOptions(toolOptions : Option[], tool : string, backendUrl: string): string {
+    static checkbox(name : string, defaultValue: string): string {
+        const select = `
+        <div class="checkbox">
+            <input id="${name}-checkbox" type="checkbox" onchange= "onCheckboxChange()" ${defaultValue === 'checked' ? 'checked' : ''}>
+            <label>${name[0].toUpperCase() + name.slice(1)}</label>
+        </div>
+        <script>
+            ${ScriptProvider.getCheckboxScript(name)}
+        </script>`;
+        return select;
+    }
+
+    static assembleOptions(toolOptions : Option[], tool : string): string {
         let res = '';
         for(const option of toolOptions){
             switch (option.type) {
-                case 'weaveApplication':
-                    res += this.weaveApplication(option.name, backendUrl);
-                    break;
-            
                 case 'select':
                     if (!option.values) {
-                        console.error(`No options found for tool: ${tool}`);
+                        console.error(`No values found for select in tool: ${tool}`);
                         break;
                     }
-                    res += this.select(option.name, option.values);
+                    res += this.select(option.name, option.values, option.defaultValue!);
+                    break;
+                case 'checkbox':
+                    if (!option.defaultValue) {
+                        console.error(`No default value found for checkbox in tool: ${tool}`);
+                        break;
+                    }
+                    res += this.checkbox(option.name, option.defaultValue!);
                     break;
             }
         }
@@ -76,6 +91,8 @@ export class HtmlTemplateProvider {
 
         const cssUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'media', 'sidebar.css'));
 
+        const weaverName = "weaver-" + tool;
+
         return `
         <!DOCTYPE html>
         <html lang="en">
@@ -90,7 +107,9 @@ export class HtmlTemplateProvider {
 
                     <div style="display:flex; flex-direction: column; gap: 20px">
 
-                        ${this.assembleOptions(extraOptions, tool, backendUrl)}
+                        ${this.weaveApplication(weaverName,backendUrl)}
+
+                        ${this.assembleOptions(extraOptions, tool)}
 
                     </div>
 

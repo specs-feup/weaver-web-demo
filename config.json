@@ -9,10 +9,6 @@
     },
     "options" : [
       {
-        "name" : "weaver-clava",
-        "type" : "weaveApplication" 
-      },
-      {
         "name" : "standard",
         "values": [
           "C89",
@@ -66,12 +62,7 @@
       "imgWidth" : 234,
       "imgHeight" : 46
     },
-    "options" : [
-      {
-        "name" : "weaver-kadabra",
-        "type" : "weaveApplication" 
-      }
-    ],
+    "options" : [],
     "logos" :[
       {
         "link" : "https://specs.fe.up.pt/",
@@ -97,12 +88,7 @@
       "imgWidth" : 234,
       "imgHeight" : 46
     },
-    "options" : [
-      {
-        "name" : "weaver-metafor",
-        "type" : "weaveApplication" 
-      }
-    ],
+    "options" : [],
     "logos" :[
       {
         "link" : "https://specs.fe.up.pt/",

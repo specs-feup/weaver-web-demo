@@ -11,7 +11,8 @@ export interface Option{
     name: string,
     values?: string[],
     type: string,
-    flag?: string
+    flag?: string,
+    defaultValue?: string
 }
 
 export interface Logo {

@@ -1,5 +1,7 @@
 FROM node:22
 
+# FROM sitespeedio/node:ubuntu-24-04-nodejs-20.15.1
+
 # Set working directory inside the container
 WORKDIR /app
 
@@ -8,6 +10,7 @@ ENV TOOL=${TOOL}
 
 RUN apt-get update && \
     apt-get install -y python3 make g++ openjdk-17-jdk && \
+    # apt-get install -y python3 make g++ openjdk-21-jdk && \
     apt-get clean
 
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
