@@ -29,7 +29,7 @@ function argsAssembler(){
                 args.push("-std");
                 args.push(info[name].toLowerCase());
                 break;
-            // case "exemplo":
+            // case "exemplo":  this example is for a option called example that is a checkbox
             //     if(info[name]){
             //         args.push("-exemplo");
             //     }
@@ -50,7 +50,7 @@ function messageHandler(message: any){
                 const value = message.value;
                 info[option.name] = value;
                 vscode.window.showInformationMessage(`Selected '${option.name}': ${value}`);
-            } 
+            }
             else if(option.type === 'checkbox') {
                 const value = message.value;
                 info[option.name] = value;
