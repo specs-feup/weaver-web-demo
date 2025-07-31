@@ -1,69 +1,42 @@
 export class ScriptProvider {
     static getWeaveApplicationScript(backendUrl: string): string {
-    return `
-        const vscode = acquireVsCodeApi();
-
-        function grayOutColor(color) {
-            // Handle hex format
-            if (color.startsWith("#")) {
-                const hex = color.replace("#", "");
-                if (hex.length === 6) {
-                    let r = parseInt(hex.substring(0, 2), 16);
-                    let g = parseInt(hex.substring(2, 4), 16);
-                    let b = parseInt(hex.substring(4, 6), 16);
-
-                    const toGray = c => Math.round(c + 0.2 * (128 - c));
-                    r = toGray(r);
-                    g = toGray(g);
-                    b = toGray(b);
-
-                    const toHex = n => n.toString(16).padStart(2, "0");
-                    return "#" + toHex(r) + toHex(g) + toHex(b);
-                }
+        return `
+            const vscode = acquireVsCodeApi();
+            function grayOutRgbColor(rgbColor, factor = 0.6) {
+            const match = rgbColor.match(/\\d+/g);
+            if (!match) return rgbColor;
+            const [r, g, b] = match.map(Number);
+            const target = 120; // Target gray value
+            return "rgb(" +
+            Math.round(r + (target - r) * factor) + ", " +
+            Math.round(g + (target - g) * factor) + ", " +
+            Math.round(b + (target - b) * factor) + ")";
             }
-
-            // Handle rgb/rgba format
-            const match = color.match(/rgba?\\((\\d+),\\s*(\\d+),\\s*(\\d+)/);
-            if (match) {
-                let [r, g, b] = match.slice(1, 4).map(Number);
-                const toGray = c => Math.round(c + 0.2 * (128 - c));
-                r = toGray(r);
-                g = toGray(g);
-                b = toGray(b);
-                return \`rgb(\${r}, \${g}, \${b})\`;
-            }
-
-            // fallback
-            return color;
-        }
-
-        function weaveApplication() {
+            function weaveApplication() {
             const button = document.getElementsByClassName('weaver-button')[0];
             if (button) {
-                const originalColor = window.getComputedStyle(button).backgroundColor;
-                const grayColor = grayOutColor(originalColor);
-
-                button.disabled = true;
-                button.style.backgroundColor = grayColor;
-                console.log("Congelado");
-
-                setTimeout(() => {
-                    button.disabled = false;
-                    button.style.backgroundColor = originalColor;
-                    console.log("Descongelado");
-                }, 5000);
+            const originalColor = window.getComputedStyle(button).backgroundColor;
+            const grayColor = grayOutRgbColor(originalColor);
+            button.disabled = true;
+            button.style.backgroundColor = grayColor;
+            console.log("Congelado");
+            setTimeout(() => {
+            button.disabled = false;
+            button.style.backgroundColor = originalColor;
+            console.log("Descongelado");
+            }, 5000);
             } else {
-                console.error("Weave Application element not found");
+            console.error("Weave Application element not found");
             }
-
             const apiUrl = '${backendUrl}/api/weave';
-            vscode.postMessage({ 
-                command: 'weave',
-                url: apiUrl
+            vscode.postMessage({
+            command: 'weave',
+            url: apiUrl
             });
-        }
-    `;
-}
+            }
+            `;
+    }
+// ... rest of your methods
 
 
     static getSelectScript(values : string[], name: string, defaultValue : string): string {
