@@ -13,7 +13,7 @@ export class ScriptProvider {
                 Math.round(b + (target - b) * factor) + ")";
             }
             function weaveApplication() {
-                button = document.getElementsByClassName('weaver-button')[0];
+                const button = document.getElementsByClassName('weaver-button')[0];
                 if (button) {
                     const originalColor = window.getComputedStyle(button).backgroundColor;
                     const grayColor = grayOutRgbColor(originalColor);
