@@ -87,11 +87,20 @@ class WeaverWebviewViewProvider implements vscode.WebviewViewProvider {
                 argsAssembler();
                 this.sendServerRequest(message.url)
                     .then((data) => {
+
                         this.updateWorkspaceFiles(data);
+                        webviewView.webview.postMessage({
+                            command: 'weaveComplete',
+                            originalColor: message.originalColor
+                        });
                         vscode.window.showInformationMessage(`File downloaded successfully`);
                     })
                     .catch(error => {
                         vscode.window.showErrorMessage(`Error downloading file: ${error.message}`);
+                        webviewView.webview.postMessage({
+                            command: 'weaveError',
+                            originalColor: message.originalColor
+                        });
                     });
                 }
             messageHandler(message);

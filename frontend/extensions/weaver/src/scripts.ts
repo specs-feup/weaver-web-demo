@@ -14,24 +14,21 @@ export class ScriptProvider {
             }
             function weaveApplication() {
                 const button = document.getElementsByClassName('weaver-button')[0];
+                let originalColor = "#000000";
                 if (button) {
-                    const originalColor = window.getComputedStyle(button).backgroundColor;
+                    originalColor = window.getComputedStyle(button).backgroundColor;
                     const grayColor = grayOutRgbColor(originalColor);
                     button.disabled = true;
                     button.style.backgroundColor = grayColor;
                     console.log("Congelado");
-                    setTimeout(() => {
-                        button.disabled = false;
-                        button.style.backgroundColor = originalColor;
-                        console.log("Descongelado");
-                    }, 5000);
                 } else {
                     console.error("Weave Application element not found");
                 }
                 const apiUrl = '${backendUrl}/api/weave';
                 vscode.postMessage({
                     command: 'weave',
-                    url: apiUrl
+                    url: apiUrl,
+                    originalColor: originalColor
                 });
             }
             `;

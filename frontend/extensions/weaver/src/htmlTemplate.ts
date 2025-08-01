@@ -118,6 +118,33 @@ export class HtmlTemplateProvider {
                     </div>
                 </div>
             </div>
+            <script>
+                window.addEventListener('message', event => {
+                    const message = event.data;
+                    const button = document.getElementsByClassName('weaver-button')[0];
+
+                    switch (message.command) {
+                        case 'weaveComplete':
+                            if (button) {
+                                button.disabled = false;
+                                button.style.backgroundColor = message.originalColor || '';
+                            }
+                            console.log("Descongelado");
+                            console.log("Weave Completed");
+                            break;
+
+                        case 'weaveError':
+                            if (button) {
+                                button.disabled = false;
+                                button.style.backgroundColor = message.originalColor || '';
+                            }
+                            console.log("Descongelado");
+                            console.log("Weave Failed");
+                            break;
+                    }
+                });
+            </script>
+
         </body>
         </html>
         `;
