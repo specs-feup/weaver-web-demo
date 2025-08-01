@@ -19,9 +19,27 @@ ENV PATH="${JAVA_HOME}/bin:${PATH}"
 # Copy package.json and package-lock.json first
 COPY package*.json ./
 
-RUN npm ci
+# Install wget
+#RUN apt install wget
 
-RUN npm install -g @specs-feup/${TOOL}
+# Install nvm
+#RUN wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+
+# Install node 20
+#RUN nvm install 20.19.4
+#RUN nvm use 20.19.4
+
+# Using npm install to update weavers to last version when restarting
+#RUN npm ci
+
+# To force update
+#RUN rm ./node_modules/@specs-feup -rf
+
+RUN npm install && npm update
+
+#RUN npm install -g @specs-feup/${TOOL}
+#RUN npm uninstall -g @specs-feup/${TOOL}
+#RUN npm install @specs-feup/${TOOL}
 
 # Copy the rest of the backend code
 COPY . .
