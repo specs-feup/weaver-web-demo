@@ -19,6 +19,8 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+#    extra_hosts:
+#      - "host.docker.internal:host-gateway"
 
   frontend:
     build:
@@ -51,6 +53,7 @@ services:
        --default-workspace /home/workspace/files
        --default-folder /home/workspace/files
        --disable-workspace-trust
+       --server-base-path /tools/${TOOL}
        --start-server"
     ]
 
