@@ -35,11 +35,13 @@ COPY package*.json ./
 # To force update
 #RUN rm ./node_modules/@specs-feup -rf
 
+#RUN npm rm package
+
 RUN npm install && npm update
 
 #RUN npm install -g @specs-feup/${TOOL}
 #RUN npm uninstall -g @specs-feup/${TOOL}
-#RUN npm install @specs-feup/${TOOL}
+#RUN npm install @specs-feup/${TOOL}@latest
 
 # Copy the rest of the backend code
 COPY . .
