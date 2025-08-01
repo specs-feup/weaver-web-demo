@@ -80,14 +80,14 @@ async function runWeaver(
     await unzipFile(inputFile, inputPath);
     const resultFolderName = 'woven_code';
 
-    const finalArgs = ['classic', scriptFile, '-p', inputPath, '-o', tempDir, ...args];
+    const finalArgs = [tool, 'classic', scriptFile, '-p', inputPath, '-o', tempDir, ...args];
 
-    console.log(`Running command: ${tool} ${finalArgs.join(' ')}`);
+    console.log(`Running command: npx ${finalArgs.join(' ')}`);
 
     let logContent = '';
 
     await new Promise<void>((resolve, reject) => {
-        execFile(tool, finalArgs, (error, stdout, stderr) => {
+        execFile("npx", finalArgs, (error, stdout, stderr) => {
             // Concatenate stdout, stderr and error for the log
             logContent = stdout + '\n\n' + stderr + '\n' + error + '\n\n';
             
